@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RenderIcon } from './Icons';
+import { signUp, signIn, signInWithGoogle as sbSignInWithGoogle, saveLead } from '../services/authService.js';
+import { OFFLINE_MODE } from '../lib/supabase.js';
 
 /* ═══════════════════════════════════════════════════════════════
    ONBOARDING DATA — Rubros, problemas y opciones por perfil
@@ -141,21 +143,16 @@ const SCALE_OPTIONS = [
 ];
 
 /* ═══════════════════════════════════════════════════════════════
-   PERSISTENCE — Save onboarding data to localStorage
+   PERSISTENCE — Save onboarding data to localStorage (offline fallback)
    ═══════════════════════════════════════════════════════════════ */
 
-function saveOnboardingData(data) {
-  const entry = {
-    ...data,
-    timestamp: new Date().toISOString(),
-    userAgent: navigator.userAgent,
-    screenWidth: window.innerWidth,
-  };
-  const existing = JSON.parse(localStorage.getItem("metriq_leads") || "[]");
-  existing.push(entry);
-  localStorage.setItem("metriq_leads", JSON.stringify(existing));
-  // Also log for dev visibility
-  console.log("[Metriq Lead]", entry);
+function saveOnboardingDataLocal(data) {
+  try {
+    const entry = { ...data, timestamp: new Date().toISOString(), userAgent: navigator.userAgent, screenWidth: window.innerWidth };
+    const existing = JSON.parse(localStorage.getItem("metriq_leads") || "[]");
+    existing.push(entry);
+    localStorage.setItem("metriq_leads", JSON.stringify(existing));
+  } catch {}
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -244,6 +241,9 @@ export default function OnboardingLogin({ onComplete }) {
   const [analyzeIdx, setAnalyzeIdx] = useState(0);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [authMode, setAuthMode] = useState("signup"); // 'signup' | 'login'
+  const [loading, setLoading] = useState(false);
+  const [authError, setAuthError] = useState(null);
 
   const roleObj = ROLES.find((r) => r.id === role);
   const rubros = role ? (RUBROS_BY_ROLE[role] || []) : [];
@@ -293,18 +293,57 @@ export default function OnboardingLogin({ onComplete }) {
   ];
 
   /* Step 5: Submit */
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email.trim()) return;
-    const data = { email, role, rubro, problems, scale };
-    saveOnboardingData(data);
-    onComplete(data);
+    setAuthError(null);
+    setLoading(true);
+
+    if (OFFLINE_MODE) {
+      saveOnboardingDataLocal({ email, role, rubro, problems, scale });
+      onComplete({ email, role, rubro, problems, scale });
+      return;
+    }
+
+    try {
+      await saveLead({ email, role, rubro, problems, scale });
+      if (authMode === 'signup') {
+        await signUp({ email, password, nombre: email.split('@')[0], role, rubro, scale, problems });
+      } else {
+        await signIn({ email, password });
+      }
+      // onAuthStateChange in App.jsx handles navigation to /dashboard
+    } catch (err) {
+      const msg = err.message || '';
+      if (authMode === 'signup' && (msg.toLowerCase().includes('already') || msg.toLowerCase().includes('registered'))) {
+        setAuthMode('login');
+        setAuthError('Ese email ya tiene una cuenta. Ingresá tu contraseña para iniciar sesión.');
+      } else if (msg.toLowerCase().includes('invalid') || msg.toLowerCase().includes('credentials')) {
+        setAuthError('Email o contraseña incorrectos.');
+      } else {
+        setAuthError(msg || 'Error al autenticar. Revisá tus datos.');
+      }
+      setLoading(false);
+    }
   };
 
-  const handleGoogle = () => {
-    const data = { email: "google@user.com", role, rubro, problems, scale };
-    saveOnboardingData(data);
-    onComplete(data);
+  const handleGoogle = async () => {
+    setAuthError(null);
+    setLoading(true);
+    if (OFFLINE_MODE) {
+      const data = { email: "google@user.com", role, rubro, problems, scale };
+      saveOnboardingDataLocal(data);
+      onComplete(data);
+      return;
+    }
+    try {
+      await saveLead({ email: '', role, rubro, problems, scale });
+      await sbSignInWithGoogle();
+      // Redirects to /dashboard via OAuth flow — no further action needed
+    } catch (err) {
+      setAuthError(err.message || 'Error al conectar con Google.');
+      setLoading(false);
+    }
   };
 
   return (
@@ -468,8 +507,8 @@ export default function OnboardingLogin({ onComplete }) {
             <motion.div key="s5" className="ob-form-wrap" variants={stepVariants}
               initial="initial" animate="animate" exit="exit" transition={{ duration: 0.3 }}>
               <StepBar current={5} total={TOTAL_STEPS} />
-              <h1 className="ob-title">Tu Metriq está listo</h1>
-              <p className="ob-subtitle">Solo falta tu email para acceder</p>
+              <h1 className="ob-title">{authMode === 'signup' ? 'Tu Metriq está listo' : 'Bienvenido de vuelta'}</h1>
+              <p className="ob-subtitle">{authMode === 'signup' ? 'Solo falta crear tu cuenta' : 'Ingresá para continuar'}</p>
 
               {/* Summary */}
               <div className="ob-summary">
@@ -501,29 +540,42 @@ export default function OnboardingLogin({ onComplete }) {
                 <div className="ob-field">
                   <label className="ob-label">Email</label>
                   <input className="ob-input" type="email" placeholder="tu@email.com"
-                    value={email} onChange={(e) => setEmail(e.target.value)}
-                    required autoComplete="email" autoFocus />
+                    value={email} onChange={(e) => { setEmail(e.target.value); setAuthError(null); }}
+                    required autoComplete="email" autoFocus disabled={loading} />
                 </div>
                 <div className="ob-field">
                   <label className="ob-label">Contraseña</label>
-                  <input className="ob-input" type="password" placeholder="Mínimo 6 caracteres"
-                    value={password} onChange={(e) => setPassword(e.target.value)}
-                    autoComplete="new-password" />
+                  <input className="ob-input" type="password"
+                    placeholder={authMode === 'signup' ? 'Mínimo 6 caracteres' : 'Tu contraseña'}
+                    value={password} onChange={(e) => { setPassword(e.target.value); setAuthError(null); }}
+                    autoComplete={authMode === 'signup' ? 'new-password' : 'current-password'}
+                    disabled={loading} />
                 </div>
 
-                <button className="ob-submit" type="submit">
-                  Acceder a Metriq <span className="ob-submit-arrow">→</span>
+                {authError && (
+                  <div style={{ background: 'rgba(168,16,46,0.08)', border: '1px solid rgba(168,16,46,0.25)', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#A8102E', marginBottom: 4 }}>
+                    {authError}
+                  </div>
+                )}
+
+                <button className="ob-submit" type="submit" disabled={loading}
+                  style={loading ? { opacity: 0.6, cursor: 'not-allowed' } : {}}>
+                  {loading ? 'Procesando…' : authMode === 'signup' ? 'Crear cuenta en Metriq' : 'Iniciar sesión'}
+                  {!loading && <span className="ob-submit-arrow">→</span>}
                 </button>
 
                 <div className="ob-divider"><span>o continuá con</span></div>
 
-                <button className="ob-social" type="button" onClick={handleGoogle}>
+                <button className="ob-social" type="button" onClick={handleGoogle} disabled={loading}>
                   <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
                   Google
                 </button>
 
                 <p className="ob-footer-text">
-                  ¿Ya tenés cuenta? <a href="#" onClick={(e) => { e.preventDefault(); onComplete({ email: "returning", role, rubro }); }}>Iniciá sesión</a>
+                  {authMode === 'signup'
+                    ? <>¿Ya tenés cuenta? <a href="#" onClick={(e) => { e.preventDefault(); setAuthMode('login'); setAuthError(null); }}>Iniciá sesión</a></>
+                    : <>¿No tenés cuenta? <a href="#" onClick={(e) => { e.preventDefault(); setAuthMode('signup'); setAuthError(null); }}>Registrate gratis</a></>
+                  }
                 </p>
               </form>
 
