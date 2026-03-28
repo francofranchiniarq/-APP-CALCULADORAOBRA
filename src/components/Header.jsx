@@ -1,4 +1,13 @@
-export default function Header({ onLogoClick }) {
+const ROLE_LABELS = {
+  instalador: 'Instalador',
+  profesional: 'Profesional',
+  empresa: 'Empresa',
+};
+
+export default function Header({ onLogoClick, user, onLogout, role, onToggleRole }) {
+  const roleLabel = ROLE_LABELS[role] || 'PRO';
+  const nextRole  = role === 'instalador' ? 'Profesional' : 'Instalador';
+
   return (
     <header className="hdr">
       <div className="hdr-l" onClick={onLogoClick}>
@@ -11,7 +20,26 @@ export default function Header({ onLogoClick }) {
         </div>
         <div className="hdr-name">METR<span>IQ</span></div>
       </div>
-      <div className="hdr-pill">PRO</div>
+
+      <div className="hdr-r">
+        {/* Toggle temporal para testing de roles */}
+        <button className="hdr-role-toggle" onClick={onToggleRole} title="Cambiar vista de rol (testing)">
+          <span className="hdr-role-toggle-dot" />
+          Ver como {nextRole} →
+        </button>
+
+        <div className="hdr-pill">{roleLabel}</div>
+
+        {user && (
+          <button className="hdr-logout" onClick={onLogout} title="Cerrar sesión">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+          </button>
+        )}
+      </div>
     </header>
   );
 }
