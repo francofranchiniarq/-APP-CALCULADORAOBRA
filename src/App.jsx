@@ -69,23 +69,22 @@ function BudgetPage() {
   return <BudgetView onBack={() => navigate('/dashboard')} />;
 }
 
-function DashPage({ user }) {
+function DashPage({ user, role }) {
   const navigate = useNavigate();
   const openMod = (m) => {
     if (m.id === "presup") navigate('/dashboard/presupuesto');
     else navigate(`/dashboard/calc/${m.id}`);
   };
-  return <Dashboard onOpen={openMod} user={user} />;
+  return <Dashboard onOpen={openMod} user={user} role={role} />;
 }
 
 function AppShell({ user, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleSidebarSelect = (m) => {
-    if (m.id === "presup") navigate('/dashboard/presupuesto');
-    else navigate(`/dashboard/calc/${m.id}`);
-  };
+  // Role state simulado — por defecto usa el rol del onboarding, alternables para testing
+  const [role, setRole] = useState(user?.role || 'profesional');
+  const toggleRole = () => setRole(r => r === 'profesional' ? 'instalador' : 'profesional');
 
   const path = location.pathname;
   let activeId = null;
@@ -94,13 +93,19 @@ function AppShell({ user, onLogout }) {
 
   return (
     <div className="app">
-      <Header onLogoClick={() => navigate('/dashboard')} user={user} onLogout={onLogout} />
+      <Header
+        onLogoClick={() => navigate('/dashboard')}
+        user={user}
+        onLogout={onLogout}
+        role={role}
+        onToggleRole={toggleRole}
+      />
       <div className="layout">
-        <Sidebar activeId={activeId} onSelect={handleSidebarSelect} user={user} />
+        <Sidebar activeId={activeId} role={role} />
         <main className="main">
           <AnimatePresence mode="wait">
             <motion.div
-              key={location.pathname}
+              key={location.pathname + role}
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
@@ -108,7 +113,7 @@ function AppShell({ user, onLogout }) {
               style={{ height: '100%' }}
             >
               <Routes location={location}>
-                <Route path="/" element={<DashPage user={user} />} />
+                <Route path="/" element={<DashPage user={user} role={role} />} />
                 <Route path="/calc/:moduleId" element={<CalcPageWrapper />} />
                 <Route path="/presupuesto" element={<BudgetPage />} />
               </Routes>

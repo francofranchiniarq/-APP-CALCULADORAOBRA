@@ -4,8 +4,9 @@ const ROLE_LABELS = {
   empresa: 'Empresa',
 };
 
-export default function Header({ onLogoClick, user, onLogout }) {
-  const roleLabel = user ? (ROLE_LABELS[user.role] || 'PRO') : 'PRO';
+export default function Header({ onLogoClick, user, onLogout, role, onToggleRole }) {
+  const roleLabel = ROLE_LABELS[role] || 'PRO';
+  const nextRole  = role === 'instalador' ? 'Profesional' : 'Instalador';
 
   return (
     <header className="hdr">
@@ -19,8 +20,16 @@ export default function Header({ onLogoClick, user, onLogout }) {
         </div>
         <div className="hdr-name">METR<span>IQ</span></div>
       </div>
+
       <div className="hdr-r">
+        {/* Toggle temporal para testing de roles */}
+        <button className="hdr-role-toggle" onClick={onToggleRole} title="Cambiar vista de rol (testing)">
+          <span className="hdr-role-toggle-dot" />
+          Ver como {nextRole} →
+        </button>
+
         <div className="hdr-pill">{roleLabel}</div>
+
         {user && (
           <button className="hdr-logout" onClick={onLogout} title="Cerrar sesión">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
