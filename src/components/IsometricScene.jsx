@@ -13,7 +13,7 @@ const SCENES = [
   {
     id: "presupuesto",
     label: "Cómputos y Presupuestos",
-    color: "#E0024E",
+    color: "#CF3055",
     hotspots: [
       { x: 80, y: 55, label: "Cómputo métrico", desc: "Consolidá todos los rubros", side: "left" },
       { x: 290, y: 42, label: "Costos unitarios", desc: "ARS/USD en tiempo real", side: "right" },
@@ -24,7 +24,7 @@ const SCENES = [
   {
     id: "seco",
     label: "Construcción en Seco",
-    color: "#E0024E",
+    color: "#CF3055",
     hotspots: [
       { x: 120, y: 30, label: "Montantes", desc: "Montantes, soleras y rieles", side: "left" },
       { x: 285, y: 60, label: "Placas", desc: "Optimización de corte y despiece", side: "right" },
@@ -73,34 +73,34 @@ function ScenePresupuesto({ activeHotspot }) {
   return (
     <g>
       {/* Floor grid */}
-      <path d="M60,170 L180,110 L300,170 L180,230Z" fill="rgba(224,2,78,0.04)" stroke="rgba(224,2,78,0.15)" strokeWidth="1"/>
+      <path d="M60,170 L180,110 L300,170 L180,230Z" fill="rgba(207,48,85,0.04)" stroke="rgba(207,48,85,0.15)" strokeWidth="1"/>
       {/* Grid lines on floor */}
-      <path d="M90,155 L210,215" stroke="rgba(224,2,78,0.08)" strokeWidth="0.5"/>
-      <path d="M120,140 L240,200" stroke="rgba(224,2,78,0.08)" strokeWidth="0.5"/>
-      <path d="M150,125 L270,185" stroke="rgba(224,2,78,0.08)" strokeWidth="0.5"/>
-      <path d="M120,185 L240,125" stroke="rgba(224,2,78,0.08)" strokeWidth="0.5"/>
-      <path d="M90,200 L210,140" stroke="rgba(224,2,78,0.08)" strokeWidth="0.5"/>
+      <path d="M90,155 L210,215" stroke="rgba(207,48,85,0.08)" strokeWidth="0.5"/>
+      <path d="M120,140 L240,200" stroke="rgba(207,48,85,0.08)" strokeWidth="0.5"/>
+      <path d="M150,125 L270,185" stroke="rgba(207,48,85,0.08)" strokeWidth="0.5"/>
+      <path d="M120,185 L240,125" stroke="rgba(207,48,85,0.08)" strokeWidth="0.5"/>
+      <path d="M90,200 L210,140" stroke="rgba(207,48,85,0.08)" strokeWidth="0.5"/>
 
       {/* Clipboard / document */}
-      <rect x="100" y="40" width="80" height="100" rx="4" fill="rgba(20,20,25,0.9)" stroke="#E0024E" strokeWidth="1.2"/>
-      <rect x="120" y="35" width="40" height="12" rx="3" fill="#E0024E" opacity="0.8"/>
+      <rect x="100" y="40" width="80" height="100" rx="4" fill="rgba(20,20,25,0.9)" stroke="#CF3055" strokeWidth="1.2"/>
+      <rect x="120" y="35" width="40" height="12" rx="3" fill="#CF3055" opacity="0.8"/>
       {/* Lines on document */}
-      <line x1="112" y1="60" x2="168" y2="60" stroke="rgba(224,2,78,0.4)" strokeWidth="1.5"/>
-      <line x1="112" y1="72" x2="155" y2="72" stroke="rgba(224,2,78,0.25)" strokeWidth="1"/>
-      <line x1="112" y1="82" x2="160" y2="82" stroke="rgba(224,2,78,0.25)" strokeWidth="1"/>
-      <line x1="112" y1="92" x2="148" y2="92" stroke="rgba(224,2,78,0.25)" strokeWidth="1"/>
-      <line x1="112" y1="102" x2="165" y2="102" stroke="rgba(224,2,78,0.25)" strokeWidth="1"/>
+      <line x1="112" y1="60" x2="168" y2="60" stroke="rgba(207,48,85,0.4)" strokeWidth="1.5"/>
+      <line x1="112" y1="72" x2="155" y2="72" stroke="rgba(207,48,85,0.25)" strokeWidth="1"/>
+      <line x1="112" y1="82" x2="160" y2="82" stroke="rgba(207,48,85,0.25)" strokeWidth="1"/>
+      <line x1="112" y1="92" x2="148" y2="92" stroke="rgba(207,48,85,0.25)" strokeWidth="1"/>
+      <line x1="112" y1="102" x2="165" y2="102" stroke="rgba(207,48,85,0.25)" strokeWidth="1"/>
       {/* Total box */}
-      <rect x="112" y="112" width="56" height="16" rx="2" fill="rgba(224,2,78,0.15)" stroke="#E0024E" strokeWidth="0.8"/>
-      <text x="140" y="124" fill="#E0024E" fontSize="8" fontWeight="bold" textAnchor="middle" fontFamily="JetBrains Mono">$1.250.000</text>
+      <rect x="112" y="112" width="56" height="16" rx="2" fill="rgba(207,48,85,0.15)" stroke="#CF3055" strokeWidth="0.8"/>
+      <text x="140" y="124" fill="#CF3055" fontSize="8" fontWeight="bold" textAnchor="middle" fontFamily="JetBrains Mono">$1.250.000</text>
 
       {/* Gantt chart floating */}
       <g transform="translate(210, 55)">
-        <rect x="0" y="0" width="95" height="75" rx="4" fill="rgba(20,20,25,0.9)" stroke="rgba(224,2,78,0.3)" strokeWidth="1"/>
+        <rect x="0" y="0" width="95" height="75" rx="4" fill="rgba(20,20,25,0.9)" stroke="rgba(207,48,85,0.3)" strokeWidth="1"/>
         {/* Gantt bars */}
-        <rect x="30" y="12" width="40" height="7" rx="2" fill="#E0024E" opacity="0.7"/>
+        <rect x="30" y="12" width="40" height="7" rx="2" fill="#CF3055" opacity="0.7"/>
         <rect x="38" y="24" width="30" height="7" rx="2" fill="#561820" opacity="0.8"/>
-        <rect x="25" y="36" width="50" height="7" rx="2" fill="#E0024E" opacity="0.5"/>
+        <rect x="25" y="36" width="50" height="7" rx="2" fill="#CF3055" opacity="0.5"/>
         <rect x="45" y="48" width="35" height="7" rx="2" fill="#561820" opacity="0.6"/>
         {/* Y labels */}
         <text x="8" y="19" fill="#8E8E93" fontSize="5" fontFamily="JetBrains Mono">ET1</text>
@@ -108,7 +108,7 @@ function ScenePresupuesto({ activeHotspot }) {
         <text x="8" y="43" fill="#8E8E93" fontSize="5" fontFamily="JetBrains Mono">ET3</text>
         <text x="8" y="55" fill="#8E8E93" fontSize="5" fontFamily="JetBrains Mono">ET4</text>
         {/* Time axis */}
-        <line x1="25" y1="62" x2="88" y2="62" stroke="rgba(224,2,78,0.2)" strokeWidth="0.5"/>
+        <line x1="25" y1="62" x2="88" y2="62" stroke="rgba(207,48,85,0.2)" strokeWidth="0.5"/>
         <text x="30" y="69" fill="#6B7280" fontSize="4" fontFamily="JetBrains Mono">S1</text>
         <text x="50" y="69" fill="#6B7280" fontSize="4" fontFamily="JetBrains Mono">S2</text>
         <text x="70" y="69" fill="#6B7280" fontSize="4" fontFamily="JetBrains Mono">S3</text>
@@ -116,15 +116,15 @@ function ScenePresupuesto({ activeHotspot }) {
 
       {/* Calculator floating element */}
       <g transform="translate(45, 130)">
-        <rect x="0" y="0" width="60" height="45" rx="4" fill="rgba(20,20,25,0.9)" stroke="rgba(224,2,78,0.25)" strokeWidth="1"/>
-        <text x="30" y="16" fill="#E0024E" fontSize="7" fontWeight="bold" textAnchor="middle" fontFamily="JetBrains Mono">m² = 127</text>
+        <rect x="0" y="0" width="60" height="45" rx="4" fill="rgba(20,20,25,0.9)" stroke="rgba(207,48,85,0.25)" strokeWidth="1"/>
+        <text x="30" y="16" fill="#CF3055" fontSize="7" fontWeight="bold" textAnchor="middle" fontFamily="JetBrains Mono">m² = 127</text>
         <text x="30" y="28" fill="#8E8E93" fontSize="5" textAnchor="middle" fontFamily="JetBrains Mono">Bolsas: 42</text>
         <text x="30" y="38" fill="#8E8E93" fontSize="5" textAnchor="middle" fontFamily="JetBrains Mono">Hierro: 890kg</text>
       </g>
 
       {/* Connection lines */}
-      <line x1="180" y1="115" x2="140" y2="140" stroke="rgba(224,2,78,0.15)" strokeWidth="0.5" strokeDasharray="3,3"/>
-      <line x1="180" y1="115" x2="250" y2="90" stroke="rgba(224,2,78,0.15)" strokeWidth="0.5" strokeDasharray="3,3"/>
+      <line x1="180" y1="115" x2="140" y2="140" stroke="rgba(207,48,85,0.15)" strokeWidth="0.5" strokeDasharray="3,3"/>
+      <line x1="180" y1="115" x2="250" y2="90" stroke="rgba(207,48,85,0.15)" strokeWidth="0.5" strokeDasharray="3,3"/>
     </g>
   );
 }
@@ -133,30 +133,30 @@ function SceneSeco({ activeHotspot }) {
   return (
     <g>
       {/* Floor */}
-      <path d="M60,200 L180,140 L300,200 L180,260Z" fill="rgba(224,2,78,0.03)" stroke="rgba(224,2,78,0.1)" strokeWidth="0.8"/>
+      <path d="M60,200 L180,140 L300,200 L180,260Z" fill="rgba(207,48,85,0.03)" stroke="rgba(207,48,85,0.1)" strokeWidth="0.8"/>
 
       {/* Back wall - isometric */}
-      <path d="M80,190 L80,50 L200,0 L200,130Z" fill="rgba(20,20,25,0.7)" stroke="rgba(224,2,78,0.2)" strokeWidth="1"/>
+      <path d="M80,190 L80,50 L200,0 L200,130Z" fill="rgba(20,20,25,0.7)" stroke="rgba(207,48,85,0.2)" strokeWidth="1"/>
 
       {/* Montantes (vertical studs) */}
       {[0, 30, 60, 90].map((offset, i) => (
         <g key={i}>
           <line x1={95 + offset * 0.5} y1={180 - offset * 1.1} x2={95 + offset * 0.5} y2={55 - offset * 0.4}
-            stroke="#E0024E" strokeWidth="2.5" opacity={activeHotspot === 0 ? 1 : 0.6}/>
+            stroke="#CF3055" strokeWidth="2.5" opacity={activeHotspot === 0 ? 1 : 0.6}/>
         </g>
       ))}
 
       {/* Top runner (solera superior) */}
-      <line x1="90" y1="55" x2="140" y2="22" stroke="#E0024E" strokeWidth="2" opacity="0.8"/>
+      <line x1="90" y1="55" x2="140" y2="22" stroke="#CF3055" strokeWidth="2" opacity="0.8"/>
       {/* Bottom runner */}
-      <line x1="90" y1="182" x2="140" y2="148" stroke="#E0024E" strokeWidth="2" opacity="0.8"/>
+      <line x1="90" y1="182" x2="140" y2="148" stroke="#CF3055" strokeWidth="2" opacity="0.8"/>
 
       {/* Front placa (plasterboard) */}
-      <path d="M200,130 L200,0 L310,45 L310,185Z" fill="rgba(224,2,78,0.06)" stroke="rgba(224,2,78,0.3)" strokeWidth="1.2"
+      <path d="M200,130 L200,0 L310,45 L310,185Z" fill="rgba(207,48,85,0.06)" stroke="rgba(207,48,85,0.3)" strokeWidth="1.2"
         opacity={activeHotspot === 1 ? 1 : 0.7}/>
       {/* Placa texture lines */}
-      <line x1="220" y1="15" x2="220" y2="150" stroke="rgba(224,2,78,0.08)" strokeWidth="0.5"/>
-      <line x1="260" y1="30" x2="260" y2="170" stroke="rgba(224,2,78,0.08)" strokeWidth="0.5"/>
+      <line x1="220" y1="15" x2="220" y2="150" stroke="rgba(207,48,85,0.08)" strokeWidth="0.5"/>
+      <line x1="260" y1="30" x2="260" y2="170" stroke="rgba(207,48,85,0.08)" strokeWidth="0.5"/>
 
       {/* Insulation between studs */}
       <g opacity={activeHotspot === 2 ? 0.9 : 0.4}>
@@ -169,14 +169,14 @@ function SceneSeco({ activeHotspot }) {
       {/* Screws */}
       <g opacity={activeHotspot === 3 ? 1 : 0.5}>
         {[[210, 30], [210, 70], [210, 110], [250, 50], [250, 90], [250, 130], [290, 70], [290, 110], [290, 150]].map(([cx, cy], i) => (
-          <circle key={i} cx={cx} cy={cy} r="1.5" fill="#E0024E"/>
+          <circle key={i} cx={cx} cy={cy} r="1.5" fill="#CF3055"/>
         ))}
       </g>
 
       {/* Dimension line */}
       <g opacity="0.6">
-        <line x1="93" y1="195" x2="143" y2="160" stroke="#E0024E" strokeWidth="0.5"/>
-        <text x="110" y="172" fill="#E0024E" fontSize="6" fontWeight="bold" fontFamily="JetBrains Mono" transform="rotate(-25, 110, 172)">400mm</text>
+        <line x1="93" y1="195" x2="143" y2="160" stroke="#CF3055" strokeWidth="0.5"/>
+        <text x="110" y="172" fill="#CF3055" fontSize="6" fontWeight="bold" fontFamily="JetBrains Mono" transform="rotate(-25, 110, 172)">400mm</text>
       </g>
     </g>
   );
@@ -202,9 +202,9 @@ function SceneSanitario({ activeHotspot }) {
 
       {/* Hot water pipe - red */}
       <g opacity={activeHotspot === 1 ? 1 : 0.6}>
-        <path d="M95,55 L95,150 L145,125 L145,80" fill="none" stroke="#E0024E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-        <circle cx="95" cy="55" r="3" fill="#E0024E"/>
-        <circle cx="145" cy="80" r="3" fill="#E0024E"/>
+        <path d="M95,55 L95,150 L145,125 L145,80" fill="none" stroke="#CF3055" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+        <circle cx="95" cy="55" r="3" fill="#CF3055"/>
+        <circle cx="145" cy="80" r="3" fill="#CF3055"/>
       </g>
 
       {/* Drain pipe */}
@@ -328,13 +328,13 @@ function SceneEstructura({ activeHotspot }) {
       {/* Rebar inside beam (visible through section) */}
       <g opacity={activeHotspot === 1 ? 1 : 0.5}>
         {/* Longitudinal rebar */}
-        <line x1="90" y1="65" x2="270" y2="30" stroke="#E0024E" strokeWidth="1.2"/>
-        <line x1="88" y1="75" x2="268" y2="40" stroke="#E0024E" strokeWidth="1.2"/>
-        <line x1="92" y1="60" x2="272" y2="25" stroke="#E0024E" strokeWidth="1.2"/>
+        <line x1="90" y1="65" x2="270" y2="30" stroke="#CF3055" strokeWidth="1.2"/>
+        <line x1="88" y1="75" x2="268" y2="40" stroke="#CF3055" strokeWidth="1.2"/>
+        <line x1="92" y1="60" x2="272" y2="25" stroke="#CF3055" strokeWidth="1.2"/>
         {/* Stirrups */}
         {[0, 1, 2, 3, 4, 5].map(i => (
           <rect key={i} x={95 + i * 30} y={62 - i * 6} width="8" height="14" rx="1"
-            fill="none" stroke="#E0024E" strokeWidth="0.8" opacity="0.7"
+            fill="none" stroke="#CF3055" strokeWidth="0.8" opacity="0.7"
             transform={`skewY(-12)`}/>
         ))}
       </g>

@@ -8,7 +8,7 @@ import { RenderIcon } from './Icons';
 
 const ROLES = [
   {
-    id: "instalador", icon: "wrench", color: "#E0024E",
+    id: "instalador", icon: "wrench", color: "#CF3055",
     title: "Instalador / Oficios",
     desc: "Gas, sanitaria, eléctrica, durlock, pintura u otros oficios.",
     label: "Instalador",
@@ -29,22 +29,22 @@ const ROLES = [
 
 const RUBROS_BY_ROLE = {
   instalador: [
-    { id: "seco", icon: "drywall", title: "Durlock / Steel Framing", desc: "Placas, perfilería, tornillería, aislación", color: "#E0024E" },
+    { id: "seco", icon: "drywall", title: "Durlock / Steel Framing", desc: "Placas, perfilería, tornillería, aislación", color: "#CF3055" },
     { id: "sanitario", icon: "plumbing", title: "Sanitario y Gas", desc: "Cañerías, artefactos, ventilación NAG 200", color: "#561820" },
     { id: "electrico", icon: "electric", title: "Eléctrico", desc: "Conductores, protecciones, luminotecnia", color: "#74777F" },
-    { id: "termomecanico", icon: "thermo", title: "Termomecánico / Climatización", desc: "Radiadores, splits, losa radiante, calderas", color: "#E0024E" },
+    { id: "termomecanico", icon: "thermo", title: "Termomecánico / Climatización", desc: "Radiadores, splits, losa radiante, calderas", color: "#CF3055" },
     { id: "pintura", icon: "target", title: "Pintura y Terminaciones", desc: "Rendimiento de pintura, revestimientos, pisos", color: "#74777F" },
   ],
   profesional: [
     { id: "arquitectura", icon: "compass", title: "Arquitectura", desc: "Proyecto, dirección de obra, documentación", color: "#561820" },
-    { id: "ingenieria_civil", icon: "structure", title: "Ingeniería Civil / Estructural", desc: "Cálculo, predimensionado, logística de hormigón", color: "#E0024E" },
+    { id: "ingenieria_civil", icon: "structure", title: "Ingeniería Civil / Estructural", desc: "Cálculo, predimensionado, logística de hormigón", color: "#CF3055" },
     { id: "ingenieria_inst", icon: "plumbing", title: "Ingeniería en Instalaciones", desc: "Sanitaria, gas, eléctrica, termomecánica", color: "#74777F" },
-    { id: "presupuestista", icon: "budget", title: "Presupuestos y Cómputos", desc: "Cómputo métrico, licitaciones, análisis de precios", color: "#E0024E" },
+    { id: "presupuestista", icon: "budget", title: "Presupuestos y Cómputos", desc: "Cómputo métrico, licitaciones, análisis de precios", color: "#CF3055" },
   ],
   empresa: [
     { id: "vivienda", icon: "building", title: "Viviendas", desc: "Construcción residencial, countries, edificios", color: "#561820" },
     { id: "comercial", icon: "structure", title: "Comercial / Industrial", desc: "Naves, locales, oficinas, depósitos", color: "#74777F" },
-    { id: "obra_publica", icon: "budget", title: "Obra Pública", desc: "Licitaciones, certificaciones, documentación", color: "#E0024E" },
+    { id: "obra_publica", icon: "budget", title: "Obra Pública", desc: "Licitaciones, certificaciones, documentación", color: "#CF3055" },
     { id: "reformas", icon: "drywall", title: "Reformas y Remodelaciones", desc: "Refacción parcial, ampliaciones, reciclajes", color: "#74777F" },
   ],
 };
@@ -173,7 +173,7 @@ function Spinner() {
     <div className="ob-spinner">
       <svg width="48" height="48" viewBox="0 0 48 48">
         <circle cx="24" cy="24" r="20" fill="none" stroke="rgba(224,2,78,0.12)" strokeWidth="3" />
-        <circle cx="24" cy="24" r="20" fill="none" stroke="#E0024E" strokeWidth="3"
+        <circle cx="24" cy="24" r="20" fill="none" stroke="#CF3055" strokeWidth="3"
           strokeDasharray="80 126" strokeLinecap="round">
           <animateTransform attributeName="transform" type="rotate"
             values="0 24 24;360 24 24" dur="1s" repeatCount="indefinite" />
@@ -206,13 +206,13 @@ function OptionCard({ item, selected, onClick, showCheck = true }) {
       whileHover={{ scale: 1.02, y: -2 }}
       whileTap={{ scale: 0.97 }}
       animate={selected ? {
-        borderColor: item.color || "#E0024E",
-        boxShadow: `0 0 0 3px ${item.color || "#E0024E"}25`,
+        borderColor: item.color || "#CF3055",
+        boxShadow: `0 0 0 3px ${item.color || "#CF3055"}25`,
       } : {}}
     >
       {item.icon && (
-        <div className="ob-role-icon" style={{ background: `${item.color || "#E0024E"}12` }}>
-          <RenderIcon name={item.icon} size={24} color={item.color || "#E0024E"} />
+        <div className="ob-role-icon" style={{ background: `${item.color || "#CF3055"}12` }}>
+          <RenderIcon name={item.icon} size={24} color={item.color || "#CF3055"} />
         </div>
       )}
       <div className="ob-role-info">
@@ -220,7 +220,7 @@ function OptionCard({ item, selected, onClick, showCheck = true }) {
         <div className="ob-role-desc">{item.desc}</div>
       </div>
       {showCheck && (
-        <div className="ob-role-check" style={selected ? { background: item.color || "#E0024E" } : {}}>
+        <div className="ob-role-check" style={selected ? { background: item.color || "#CF3055" } : {}}>
           {selected && "✓"}
         </div>
       )}
@@ -422,7 +422,7 @@ export default function OnboardingLogin({ onComplete }) {
                     whileHover={{ scale: 1.02, y: -2 }}
                     whileTap={{ scale: 0.97 }}
                     animate={scale === s.id ? {
-                      borderColor: "#E0024E",
+                      borderColor: "#CF3055",
                       boxShadow: "0 0 0 3px rgba(224,2,78,0.15)",
                     } : {}}
                   >
@@ -430,7 +430,7 @@ export default function OnboardingLogin({ onComplete }) {
                       <div className="ob-role-title">{s.title}</div>
                       <div className="ob-role-desc">{s.desc}</div>
                     </div>
-                    <div className="ob-role-check" style={scale === s.id ? { background: "#E0024E" } : {}}>
+                    <div className="ob-role-check" style={scale === s.id ? { background: "#CF3055" } : {}}>
                       {scale === s.id && "✓"}
                     </div>
                   </motion.div>

@@ -4,12 +4,12 @@ import { RenderIcon } from './Icons';
 import IsometricScene from './IsometricScene';
 
 const ROTATING_WORDS = [
-  { text: "Presupuestos", color: "#E0024E" },
+  { text: "Presupuestos", color: "#CF3055" },
   { text: "Cómputos", color: "#561820" },
-  { text: "Cronogramas", color: "#E0024E" },
+  { text: "Cronogramas", color: "#CF3055" },
   { text: "Materiales", color: "#561820" },
   { text: "Estructuras", color: "#74777F" },
-  { text: "Instalaciones", color: "#E0024E" },
+  { text: "Instalaciones", color: "#CF3055" },
   { text: "Planificación", color: "#561820" },
 ];
 
@@ -59,15 +59,15 @@ const FEATURES = [
 ];
 
 const MODULES_PREVIEW = [
-  { name: "Cómputo y Presupuesto", icon: "budget", color: "#E0024E", desc: "Presupuesto maestro multi-rubro. Consolidá estructura, instalaciones y terminaciones en un solo PDF con tu logo." },
-  { name: "Cronograma de Obra", icon: "gantt", color: "#E0024E", desc: "Diagrama de Gantt interactivo con etapas, dependencias, ruta crítica y seguimiento de avance." },
+  { name: "Cómputo y Presupuesto", icon: "budget", color: "#CF3055", desc: "Presupuesto maestro multi-rubro. Consolidá estructura, instalaciones y terminaciones en un solo PDF con tu logo." },
+  { name: "Cronograma de Obra", icon: "gantt", color: "#CF3055", desc: "Diagrama de Gantt interactivo con etapas, dependencias, ruta crítica y seguimiento de avance." },
   { name: "Agua Fría y Caliente", icon: "water", color: "#3B9AE1", desc: "Caños por diámetro, accesorios, llaves de paso y lista para el corralón. Termofusión, epoxi o bronce." },
   { name: "Cloacal y Pluvial", icon: "plumbing", color: "#561820", desc: "UD automáticas, diámetros de troncal y montante, accesorios PVC, bajada pluvial y ventilación." },
   { name: "Gas", icon: "gasflame", color: "#F5A623", desc: "Renouard, NAG 200, cómputo de accesorios, ventilación, conductos de evacuación y prueba de hermeticidad." },
   { name: "Eléctrico", icon: "electric", color: "#74777F", desc: "Cargá las bocas y Metriq calcula metros de cable, caño corrugado, protecciones y la lista para el corralón." },
   { name: "Estructuras", icon: "structure", color: "#561820", desc: "Dosificación de hormigón, encofrado, despiece de acero y logística de colado." },
-  { name: "Construcción en Seco", icon: "drywall", color: "#E0024E", desc: "Placas con corte optimizado, perfilería completa (montantes, soleras, rieles) y hasta el último tornillo T1/T2." },
-  { name: "Termomecánico", icon: "thermo", color: "#E0024E", desc: "Balance térmico, carga frigorífica, selección y comparador de equipos." },
+  { name: "Construcción en Seco", icon: "drywall", color: "#CF3055", desc: "Placas con corte optimizado, perfilería completa (montantes, soleras, rieles) y hasta el último tornillo T1/T2." },
+  { name: "Termomecánico", icon: "thermo", color: "#CF3055", desc: "Balance térmico, carga frigorífica, selección y comparador de equipos." },
 ];
 
 const ROI_POINTS = [
@@ -77,7 +77,7 @@ const ROI_POINTS = [
     statLabel: "de tu margen",
     title: "Ese 10% de más que pedís \"por las dudas\" no alcanza",
     desc: "Un error del 10% en acero u hormigón se come tu ganancia entera. Metriq calcula la cantidad exacta — ni un kilo de más, ni un faltante que frene la obra.",
-    accent: "#E0024E",
+    accent: "#CF3055",
   },
   {
     icon: "clock",
@@ -393,7 +393,7 @@ export default function LandingPage({ onStart }) {
               viewport={{ once: true, margin: "-50px" }}
               transition={{ delay: i * 0.1, duration: 0.5 }}
             >
-              <div className="lp-feature-icon"><RenderIcon name={f.icon} size={28} color="#E0024E" /></div>
+              <div className="lp-feature-icon"><RenderIcon name={f.icon} size={28} color="#CF3055" /></div>
               <h3 className="lp-feature-title">{f.title}</h3>
               <p className="lp-feature-desc">{f.desc}</p>
             </motion.div>
@@ -490,7 +490,7 @@ export default function LandingPage({ onStart }) {
         <h2 className="lp-section-title">Elegí el plan que se ajuste a tu obra</h2>
         <p className="lp-section-subtitle">
           14 días de prueba gratis. Sin tarjeta. Cancelá cuando quieras.<br/>
-          <span style={{ fontSize: '12px' }}>¿Equipo de +5 personas? <a href="#contact" style={{ color: '#E0024E', fontWeight: 700, textDecoration: 'none' }}>Contactanos para un plan Enterprise a medida →</a></span>
+          <span style={{ fontSize: '12px' }}>¿Equipo de +5 personas? <a href="#contact" style={{ color: '#CF3055', fontWeight: 700, textDecoration: 'none' }}>Contactanos para un plan Enterprise a medida →</a></span>
         </p>
         <div className="lp-pricing-grid">
           {TIERS.map((t, i) => (
@@ -513,7 +513,7 @@ export default function LandingPage({ onStart }) {
               <ul className="lp-pricing-features">
                 {t.features.map((f, j) => (
                   <li key={j}>
-                    <span className="lp-check" style={t.highlight ? { color: '#E0024E' } : {}}>✓</span>
+                    <span className="lp-check" style={t.highlight ? { color: '#CF3055' } : {}}>✓</span>
                     {f}
                   </li>
                 ))}
