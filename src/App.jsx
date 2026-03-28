@@ -13,6 +13,7 @@ import LeadsPanel       from './components/LeadsPanel';
 import MisProyectosView from './components/views/MisProyectosView';
 import DetalleProyectoView from './components/views/DetalleProyectoView';
 import ModuloAgua       from './components/ModuloAgua';
+import ProfileSetup     from './components/ProfileSetup';
 import { GanttChart }   from './react-gantt/components/GanttChart';
 
 import { CALC_MODULES } from './modules/calculators';
@@ -256,8 +257,9 @@ export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [user, setUser]       = useState(null);
-  const [authReady, setAuthReady] = useState(false);
+  const [user, setUser]             = useState(null);
+  const [authReady, setAuthReady]   = useState(false);
+  const [showSetup, setShowSetup]   = useState(false);
 
   // ── Inicialización de auth ──────────────────────────────────
   useEffect(() => {
@@ -311,12 +313,15 @@ export default function App() {
       // Enriquecer con datos de la sesión de Google si faltan
       const { data: { user: sbUser } } = await supabase.auth.getUser();
       const meta = sbUser?.user_metadata || {};
-      setUser({
+      const enriched = {
         ...profile,
         email:      profile.email      || sbUser?.email,
         nombre:     profile.nombre     || meta.full_name || meta.name || sbUser?.email?.split('@')[0],
         avatar_url: profile.avatar_url || meta.avatar_url || meta.picture,
-      });
+      };
+      setUser(enriched);
+      // Mostrar setup si el perfil está incompleto (sin rubro = primer login)
+      if (!profile.rubro) setShowSetup(true);
     } catch {
       if (attempt < 3) {
         setTimeout(() => loadProfile(userId, attempt + 1), 800 * attempt);
@@ -333,6 +338,7 @@ export default function App() {
         nombre:     meta.full_name || meta.name || sbUser?.email?.split('@')[0] || 'Usuario',
         avatar_url: meta.avatar_url || meta.picture || null,
       });
+      setShowSetup(true); // perfil sin datos → mostrar setup
     } finally {
       setAuthReady(true);
     }
@@ -399,6 +405,13 @@ export default function App() {
           <Routes location={location}>
             <Route path="/dashboard/*" element={<AppShell user={user} onLogout={handleLogout} />} />
           </Routes>
+          {showSetup && user && (
+            <ProfileSetup
+              user={user}
+              onComplete={(updated) => { setUser(updated); setShowSetup(false); }}
+              onSkip={() => setShowSetup(false)}
+            />
+          )}
         </motion.div>
       ) : null}
     </AnimatePresence>
