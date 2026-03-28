@@ -365,11 +365,17 @@ export default function App() {
         </motion.div>
       ) : isLanding ? (
         <motion.div key="landing" {...pageTransition}>
-          <LandingPage onStart={() => navigate('/login')} />
+          <LandingPage
+            onStart={() => navigate('/login')}
+            onLogin={() => navigate('/login', { state: { mode: 'login' } })}
+          />
         </motion.div>
       ) : isLogin ? (
         <motion.div key="login" {...pageTransition}>
-          <OnboardingLogin onComplete={handleLoginComplete} />
+          <OnboardingLogin
+            onComplete={handleLoginComplete}
+            initialMode={location.state?.mode}
+          />
         </motion.div>
       ) : isDashboard ? (
         <motion.div key="dashboard" {...pageTransition}>

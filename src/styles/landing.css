@@ -76,6 +76,12 @@
   transition: color 0.2s;
 }
 .lp-nav-link:hover { color: #1A1714; }
+.lp-nav-login {
+  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
+  padding: 8px 16px; border-radius: 20px; border: none;
+  background: transparent; color: #57534E; cursor: pointer; transition: all 0.2s;
+}
+.lp-nav-login:hover { color: #1A1714; background: #E4E0DA; }
 .lp-nav-cta {
   font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700;
   padding: 8px 20px; border-radius: 20px; border: 1px solid rgba(0,0,0,0.18);

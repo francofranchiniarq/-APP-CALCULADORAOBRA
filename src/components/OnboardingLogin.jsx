@@ -232,8 +232,9 @@ function OptionCard({ item, selected, onClick, showCheck = true }) {
 
 const TOTAL_STEPS = 6;
 
-export default function OnboardingLogin({ onComplete }) {
-  const [step, setStep] = useState(0);
+export default function OnboardingLogin({ onComplete, initialMode }) {
+  const isDirectLogin = initialMode === 'login';
+  const [step, setStep] = useState(isDirectLogin ? 5 : 0);
   const [role, setRole] = useState(null);
   const [rubro, setRubro] = useState(null);
   const [problems, setProblems] = useState([]);
@@ -241,7 +242,7 @@ export default function OnboardingLogin({ onComplete }) {
   const [analyzeIdx, setAnalyzeIdx] = useState(0);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [authMode, setAuthMode] = useState("signup"); // 'signup' | 'login'
+  const [authMode, setAuthMode] = useState(isDirectLogin ? "login" : "signup");
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState(null);
 
