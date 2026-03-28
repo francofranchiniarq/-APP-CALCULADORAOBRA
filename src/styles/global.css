@@ -67,19 +67,29 @@ body {
 }
 .hdr-name { font-size: 18px; font-weight: 900; letter-spacing: 2px; font-family: 'JetBrains Mono', monospace; }
 .hdr-name span { color: var(--accent); }
+.hdr-r { display: flex; align-items: center; gap: 8px; }
 .hdr-pill {
   font-size: 10px; font-weight: 800; padding: 4px 12px;
   background: var(--abg); color: var(--accent); border-radius: 20px; letter-spacing: 0.3px;
 }
+.hdr-logout {
+  width: 32px; height: 32px; border-radius: 10px; border: none;
+  background: transparent; color: var(--text3); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.hdr-logout:hover { background: var(--border); color: var(--text); }
 
 /* ═══ Layout ═══ */
 .layout { display: flex; flex: 1; }
 
 .side { width: 220px; padding: 8px; flex-shrink: 0; overflow-y: auto; }
+.side-group { margin-bottom: 4px; }
 .side-label {
   font-size: 9px; font-weight: 800; color: var(--text3);
   text-transform: uppercase; letter-spacing: 1.5px; padding: 12px 12px 6px;
 }
+.side-label-primary { color: var(--accent); }
 .side-item {
   display: flex; align-items: center; gap: 10px;
   padding: 10px 12px; border-radius: var(--rs); cursor: pointer;
@@ -99,6 +109,11 @@ body {
 /* ═══ Dashboard ═══ */
 .dash-greeting { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px; }
 .dash-sub { font-size: 13px; color: var(--text2); margin-bottom: 16px; }
+.dash-section-label {
+  font-size: 10px; font-weight: 800; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 1.5px;
+  margin: 16px 0 10px; padding: 0 2px;
+}
 
 .stat-cards { display: flex; gap: 10px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px; }
 .stat-card {

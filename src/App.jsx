@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Header from './components/Header';
@@ -13,10 +13,10 @@ import { CALC_MODULES } from './modules/calculators';
 import './styles/landing.css';
 
 const pageTransition = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1 },
-  exit: { opacity: 0 },
-  transition: { duration: 0.4 },
+  initial: { opacity: 0, y: 8 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -8 },
+  transition: { duration: 0.28, ease: 'easeOut' },
 };
 
 function CalcPage() {
@@ -39,7 +39,7 @@ function CalcPage() {
   });
 
   if (!mod) {
-    navigate('/', { replace: true });
+    navigate('/dashboard', { replace: true });
     return null;
   }
 
@@ -69,16 +69,16 @@ function BudgetPage() {
   return <BudgetView onBack={() => navigate('/dashboard')} />;
 }
 
-function DashPage() {
+function DashPage({ user }) {
   const navigate = useNavigate();
   const openMod = (m) => {
     if (m.id === "presup") navigate('/dashboard/presupuesto');
     else navigate(`/dashboard/calc/${m.id}`);
   };
-  return <Dashboard onOpen={openMod} />;
+  return <Dashboard onOpen={openMod} user={user} />;
 }
 
-function AppShell() {
+function AppShell({ user, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -94,15 +94,26 @@ function AppShell() {
 
   return (
     <div className="app">
-      <Header onLogoClick={() => navigate('/dashboard')} />
+      <Header onLogoClick={() => navigate('/dashboard')} user={user} onLogout={onLogout} />
       <div className="layout">
-        <Sidebar activeId={activeId} onSelect={handleSidebarSelect} />
+        <Sidebar activeId={activeId} onSelect={handleSidebarSelect} user={user} />
         <main className="main">
-          <Routes>
-            <Route path="/" element={<DashPage />} />
-            <Route path="/calc/:moduleId" element={<CalcPageWrapper />} />
-            <Route path="/presupuesto" element={<BudgetPage />} />
-          </Routes>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.22, ease: 'easeOut' }}
+              style={{ height: '100%' }}
+            >
+              <Routes location={location}>
+                <Route path="/" element={<DashPage user={user} />} />
+                <Route path="/calc/:moduleId" element={<CalcPageWrapper />} />
+                <Route path="/presupuesto" element={<BudgetPage />} />
+              </Routes>
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
     </div>
@@ -113,13 +124,36 @@ export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // ── Persistencia de sesión ──────────────────────────────────
+  const [user, setUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('metriq_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch { return null; }
+  });
+
+  // Usuario que vuelve: saltar landing → ir directo al dashboard
+  useEffect(() => {
+    if (location.pathname === '/' && user) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, []);
+
   const handleStartLogin = () => navigate('/login');
+
   const handleLoginComplete = (userData) => {
-    // In production: save userData to context/backend
+    const profile = { ...userData, loginAt: Date.now() };
+    try { localStorage.setItem('metriq_user', JSON.stringify(profile)); } catch {}
+    setUser(profile);
     navigate('/dashboard');
   };
 
-  // Determine which "view" to render based on route
+  const handleLogout = () => {
+    try { localStorage.removeItem('metriq_user'); } catch {}
+    setUser(null);
+    navigate('/');
+  };
+
   const isLanding = location.pathname === '/';
   const isLogin = location.pathname === '/login';
   const isAdmin = location.pathname === '/admin';
@@ -141,7 +175,7 @@ export default function App() {
       ) : (
         <motion.div key="dashboard" {...pageTransition}>
           <Routes location={location}>
-            <Route path="/dashboard/*" element={<AppShell />} />
+            <Route path="/dashboard/*" element={<AppShell user={user} onLogout={handleLogout} />} />
           </Routes>
         </motion.div>
       )}
