@@ -22,7 +22,7 @@ export const CALC_MODULES = [
     name: "Construcción en Seco",
     sub: "Steel Framing / Durlock",
     icon: "drywall",
-    color: "#E0024E",
+    color: "#A8102E",
     fields: [
       { k: "largo", l: "Largo muro (m)", t: "n", d: 4 },
       { k: "alto", l: "Altura (m)", t: "n", d: 2.6 },
@@ -466,7 +466,7 @@ export const CALC_MODULES = [
     name: "Termomecánico",
     sub: "Balance Térmico",
     icon: "thermo",
-    color: "#E0024E",
+    color: "#A8102E",
     fields: [
       { k: "sup", l: "Superficie (m²)", t: "n", d: 20 },
       { k: "alt", l: "Altura (m)", t: "n", d: 2.7 },
@@ -864,7 +864,7 @@ export const CALC_MODULES = [
     name: "Cronograma de Obra",
     sub: "Gantt · Etapas · Ruta Crítica",
     icon: "gantt",
-    color: "#E0024E",
+    color: "#A8102E",
     fields: [
       { k: "supTotal", l: "Superficie total (m²)", t: "n", d: 200 },
       { k: "pisos", l: "Pisos", t: "n", d: 2 },
@@ -1026,7 +1026,7 @@ export const BUDGET_MODULE = {
   name: "Presupuestos",
   sub: "Cómputo y Costos",
   icon: "budget",
-  color: "#E0024E",
+  color: "#A8102E",
 };
 
 export const ALL_MODULES = [...CALC_MODULES, BUDGET_MODULE];
