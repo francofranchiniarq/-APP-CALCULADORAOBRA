@@ -12,6 +12,7 @@ import LeadsPanel from './components/LeadsPanel';
 import MisProyectosView from './components/views/MisProyectosView';
 import DetalleProyectoView from './components/views/DetalleProyectoView';
 import ModuloAgua from './components/ModuloAgua';
+import { GanttChart } from './react-gantt/components/GanttChart';
 import { CALC_MODULES } from './modules/calculators';
 import './styles/landing.css';
 
@@ -112,10 +113,12 @@ function AppShell({ user, onLogout }) {
     setView({ id, project: null, ...extra });
   };
 
-  // Abre un módulo de cálculo (con soporte especial para agua y presupuesto)
+  // Abre un módulo de cálculo (con soporte especial para agua, gantt y presupuesto)
   const openModule = (mod, project = null) => {
     if (mod.id === 'agua') {
       setView({ id: 'modulo-agua', project });
+    } else if (mod.id === 'gantt') {
+      setView({ id: 'modulo-gantt', project });
     } else if (mod.id === 'presup') {
       navigate('/dashboard/presupuesto');
     } else {
@@ -127,6 +130,8 @@ function AppShell({ user, onLogout }) {
   const sidebarActiveId = (() => {
     const path = location.pathname;
     if (path.includes('/calc/') || path.includes('/presupuesto')) return null;
+    // Vistas de módulo no mapean a ningún ítem del sidebar
+    if (view.id === 'modulo-agua' || view.id === 'modulo-gantt') return null;
     return view.id;
   })();
 
@@ -160,6 +165,13 @@ function AppShell({ user, onLogout }) {
         return (
           <ModuloAgua
             project={view.project}
+            onBack={() => view.project ? go('proyecto-detalle', { project: view.project }) : go('dashboard')}
+          />
+        );
+      case 'modulo-gantt':
+        return (
+          <GanttChart
+            obraName={view.project?.name || 'Cronograma de Obra'}
             onBack={() => view.project ? go('proyecto-detalle', { project: view.project }) : go('dashboard')}
           />
         );
