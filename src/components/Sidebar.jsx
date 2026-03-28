@@ -17,11 +17,11 @@ const NavIcon = ({ type }) => {
 
 // ─── Configuración de navegación por rol ─────────────────────
 const NAV_PROFESIONAL = [
-  { id: 'dashboard',    label: 'Dashboard',              icon: 'home'     },
-  { id: 'proyectos',    label: 'Mis Proyectos',          icon: 'folder'   },
-  { id: 'presupuestos', label: 'Historial Presupuestos', icon: 'budget'   },
-  { id: 'precios',      label: 'Base de Precios',        icon: 'price'    },
-  { id: 'config',       label: 'Configuración',          icon: 'settings' },
+  { id: 'dashboard',     label: 'Dashboard',              icon: 'home'     },
+  { id: 'proyectos',     label: 'Mis Proyectos',          icon: 'folder'   },
+  { id: 'presupuestos',  label: 'Historial Presupuestos', icon: 'budget'   },
+  { id: 'precios',       label: 'Base de Precios',        icon: 'price'    },
+  { id: 'config',        label: 'Configuración',          icon: 'settings' },
 ];
 
 const NAV_INSTALADOR = [
@@ -30,8 +30,10 @@ const NAV_INSTALADOR = [
   { id: 'herramientas', label: 'Herramientas',     icon: 'wrench' },
 ];
 
-export default function Sidebar({ role }) {
+export default function Sidebar({ role, activeId, onNavigate }) {
   const navItems = role === 'instalador' ? NAV_INSTALADOR : NAV_PROFESIONAL;
+  // resolve active: proyecto-detalle maps back to 'proyectos' highlight
+  const effectiveActive = activeId === 'proyecto-detalle' ? 'proyectos' : (activeId || 'dashboard');
 
   return (
     <nav className="side">
@@ -39,7 +41,8 @@ export default function Sidebar({ role }) {
       {navItems.map((item, i) => (
         <motion.div
           key={item.id}
-          className={`side-nav-item ${item.id === 'dashboard' ? 'act' : ''}`}
+          className={`side-nav-item ${effectiveActive === item.id ? 'act' : ''}`}
+          onClick={() => onNavigate(item.id)}
           initial={{ opacity: 0, x: -6 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.18, delay: i * 0.04 }}

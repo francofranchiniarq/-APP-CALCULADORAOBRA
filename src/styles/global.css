@@ -481,6 +481,230 @@ body {
 }
 .upsell-btn:hover { filter: brightness(0.88); }
 
+/* ═══ Placeholder view ═══ */
+.placeholder-view {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 320px; text-align: center; gap: 6px;
+}
+.placeholder-icon { font-size: 40px; margin-bottom: 8px; }
+.placeholder-title { font-size: 20px; font-weight: 800; color: var(--text); }
+.placeholder-sub { font-size: 13px; color: var(--text2); }
+
+/* ═══ Mis Proyectos — list view ═══ */
+.projects-list { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+
+.project-row {
+  background: var(--card); border-radius: var(--r); padding: 16px 20px;
+  box-shadow: var(--sh); border: 1.5px solid var(--border2);
+  display: flex; align-items: center; gap: 16px;
+  cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s;
+}
+.project-row:hover { box-shadow: var(--shl); border-color: var(--border); }
+
+.project-row-left { flex: 1; min-width: 0; }
+.project-row-name { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.project-row-meta { font-size: 11px; color: var(--text2); font-weight: 500; }
+
+.project-row-right {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;
+}
+.project-row-budget { font-size: 13px; font-weight: 700; color: var(--text); }
+.project-row-progress { font-size: 11px; color: var(--text2); }
+.project-row-arrow { font-size: 16px; color: var(--text3); flex-shrink: 0; }
+
+.project-row-new {
+  border: 1.5px dashed var(--border); background: transparent;
+  justify-content: center; gap: 10px; cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.project-row-new:hover { background: rgba(168,16,46,0.04); border-color: var(--accent); }
+.project-row-new-icon {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: var(--abg); color: var(--accent);
+  font-size: 18px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.project-row-new-label { font-size: 13px; font-weight: 700; color: var(--accent); }
+
+/* ═══ Módulo Agua — layout ═══ */
+.modulo-agua { padding-bottom: 32px; }
+
+.agua-summary-pills {
+  display: flex; gap: 10px; flex-wrap: wrap;
+}
+.agua-pill {
+  background: var(--bg); border-radius: 10px; padding: 8px 14px;
+  text-align: center; min-width: 72px; border: 1.5px solid var(--border);
+}
+.agua-pill-val { font-size: 18px; font-weight: 800; color: var(--text); line-height: 1; }
+.agua-pill-label { font-size: 10px; font-weight: 600; color: var(--text2); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* ─── Tabs ─── */
+.agua-tabs {
+  display: flex; gap: 4px; margin: 20px 0 16px;
+  background: var(--border2); border-radius: 12px; padding: 4px;
+  width: fit-content;
+}
+.agua-tab {
+  padding: 8px 16px; border-radius: 9px; border: none;
+  background: transparent; color: var(--text2);
+  font-size: 12px; font-weight: 700; font-family: 'Inter', sans-serif;
+  cursor: pointer; transition: background 0.15s, color 0.15s;
+  display: flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+.agua-tab:hover { color: var(--text); }
+.agua-tab-act { background: var(--card); color: var(--text); box-shadow: var(--sh); }
+.agua-tab-badge {
+  font-size: 10px; font-weight: 800; padding: 2px 7px;
+  border-radius: 20px; background: var(--accent); color: #fff; line-height: 1.4;
+}
+
+/* ─── Tabla de tramos ─── */
+.tramos-wrap { background: var(--card); border-radius: var(--r); box-shadow: var(--sh); overflow: hidden; }
+.tramos-table-container { overflow-x: auto; }
+
+.tramos-table {
+  width: 100%; border-collapse: collapse; min-width: 700px;
+}
+.tramos-table th {
+  padding: 10px 12px; font-size: 10px; font-weight: 800; color: var(--text2);
+  text-transform: uppercase; letter-spacing: 1px;
+  background: var(--bg); border-bottom: 1.5px solid var(--border);
+  text-align: left; white-space: nowrap;
+}
+.tramos-table td {
+  padding: 8px 10px; border-bottom: 1px solid var(--border2);
+}
+.tramos-table tr:last-child td { border-bottom: none; }
+.tramos-table tr:hover td { background: rgba(0,0,0,0.015); }
+
+.tramos-th-desc { min-width: 160px; }
+
+.tramo-desc {
+  width: 100%; min-width: 140px; padding: 6px 10px;
+  border: 1.5px solid var(--border2); border-radius: 8px;
+  font-size: 12px; font-family: 'Inter', sans-serif; color: var(--text);
+  background: var(--bg); transition: border-color 0.15s;
+}
+.tramo-desc:focus { outline: none; border-color: var(--accent); }
+
+.tramo-num {
+  width: 68px; padding: 6px 8px; text-align: center;
+  border: 1.5px solid var(--border2); border-radius: 8px;
+  font-size: 13px; font-weight: 600; font-family: 'JetBrains Mono', monospace;
+  color: var(--text); background: var(--bg); transition: border-color 0.15s;
+}
+.tramo-num:focus { outline: none; border-color: var(--accent); }
+
+.tramo-sel {
+  padding: 6px 8px; border: 1.5px solid var(--border2); border-radius: 8px;
+  font-size: 12px; font-family: 'Inter', sans-serif; color: var(--text);
+  background: var(--bg); cursor: pointer; transition: border-color 0.15s;
+}
+.tramo-sel:focus { outline: none; border-color: var(--accent); }
+
+.tramo-del {
+  width: 28px; height: 28px; border-radius: 8px;
+  border: 1.5px solid var(--border); background: transparent;
+  color: var(--text3); font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.tramo-del:hover:not(:disabled) { background: rgba(185,28,28,0.08); color: var(--red); border-color: var(--red); }
+.tramo-del:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.tramos-actions {
+  padding: 14px 16px; background: var(--bg);
+  border-top: 1.5px solid var(--border2);
+  display: flex; gap: 10px; align-items: center;
+}
+.tramo-add-btn {
+  padding: 8px 16px; border-radius: 10px;
+  border: 1.5px dashed var(--border); background: transparent;
+  color: var(--accent); font-size: 12px; font-weight: 700;
+  font-family: 'Inter', sans-serif; cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.tramo-add-btn:hover { background: var(--abg); border-color: var(--accent); }
+.tramo-calc-btn {
+  padding: 8px 18px; border-radius: 10px; border: none;
+  background: var(--accent); color: #fff;
+  font-size: 12px; font-weight: 700; font-family: 'Inter', sans-serif;
+  cursor: pointer; transition: filter 0.15s;
+}
+.tramo-calc-btn:hover:not(:disabled) { filter: brightness(0.88); }
+.tramo-calc-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ─── Leyenda de cálculo ─── */
+.agua-leyenda {
+  margin-top: 14px; padding: 14px 16px;
+  background: var(--card); border-radius: var(--rs);
+  border: 1.5px solid var(--border2); box-shadow: var(--sh);
+}
+.agua-leyenda-title {
+  font-size: 10px; font-weight: 800; color: var(--text2);
+  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
+}
+.agua-leyenda-items { display: flex; flex-direction: column; gap: 5px; }
+.agua-leyenda-item { font-size: 12px; color: var(--text2); display: flex; gap: 8px; align-items: baseline; }
+.agua-leyenda-formula {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 600; color: var(--blue);
+  background: rgba(29,78,216,0.07); padding: 1px 7px;
+  border-radius: 5px; white-space: nowrap; flex-shrink: 0;
+}
+
+/* ─── Tabla de despiece ─── */
+.despiece-wrap {
+  background: var(--card); border-radius: var(--r);
+  box-shadow: var(--sh); overflow: hidden;
+}
+.despiece-table {
+  width: 100%; border-collapse: collapse;
+}
+.despiece-table th {
+  padding: 10px 14px; font-size: 10px; font-weight: 800; color: var(--text2);
+  text-transform: uppercase; letter-spacing: 1px;
+  background: var(--bg); border-bottom: 1.5px solid var(--border);
+  text-align: left; white-space: nowrap;
+}
+.despiece-table th:not(:first-child):not(:nth-child(2)) { text-align: center; }
+.despiece-table td { padding: 12px 14px; border-bottom: 1px solid var(--border2); }
+.despiece-table tr:last-child td { border-bottom: none; }
+.despiece-table tbody tr:hover td { background: rgba(0,0,0,0.015); }
+
+.despiece-mat {
+  font-size: 13px; font-weight: 700; color: var(--text);
+}
+.despiece-diam {
+  font-size: 12px; font-weight: 600; color: var(--blue);
+  font-family: 'JetBrains Mono', monospace;
+  background: rgba(29,78,216,0.07); padding: 2px 8px;
+  border-radius: 6px; white-space: nowrap;
+}
+.despiece-qty {
+  text-align: center; font-size: 15px; font-weight: 700;
+  color: var(--text); font-family: 'JetBrains Mono', monospace;
+}
+.despiece-total-row td {
+  background: var(--bg); border-top: 2px solid var(--border);
+  font-size: 12px; color: var(--text2);
+}
+.despiece-total-row .despiece-qty { color: var(--accent); font-size: 15px; }
+
+.despiece-actions {
+  display: flex; gap: 10px; align-items: center; margin-top: 14px;
+}
+
+/* ─── Empty state ─── */
+.agua-empty {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; min-height: 220px; gap: 8px;
+  background: var(--card); border-radius: var(--r); box-shadow: var(--sh);
+}
+.agua-empty-icon { font-size: 36px; }
+.agua-empty-text { font-size: 14px; color: var(--text2); font-weight: 600; }
+
 /* ═══ Responsive ═══ */
 @media (max-width: 768px) {
   .side { display: none; }

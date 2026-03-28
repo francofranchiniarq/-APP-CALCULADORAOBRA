@@ -9,6 +9,9 @@ import BudgetView from './components/BudgetView';
 import LandingPage from './components/LandingPage';
 import OnboardingLogin from './components/OnboardingLogin';
 import LeadsPanel from './components/LeadsPanel';
+import MisProyectosView from './components/views/MisProyectosView';
+import DetalleProyectoView from './components/views/DetalleProyectoView';
+import ModuloAgua from './components/ModuloAgua';
 import { CALC_MODULES } from './modules/calculators';
 import './styles/landing.css';
 
@@ -19,6 +22,26 @@ const pageTransition = {
   transition: { duration: 0.28, ease: 'easeOut' },
 };
 
+// ── Placeholder para vistas aún no construidas ───────────────
+function PlaceholderView({ title, onNavigate }) {
+  return (
+    <motion.div
+      className="placeholder-view"
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2 }}
+    >
+      <div className="placeholder-icon">🚧</div>
+      <div className="placeholder-title">{title}</div>
+      <div className="placeholder-sub">Esta sección está en construcción.</div>
+      <button className="calc-back" style={{ marginTop: 16 }} onClick={() => onNavigate('dashboard')}>
+        ← Volver al dashboard
+      </button>
+    </motion.div>
+  );
+}
+
+// ── Wrapper para CalcPage desde URL directa ──────────────────
 function CalcPage() {
   const { moduleId } = useParams();
   const navigate = useNavigate();
@@ -69,55 +92,152 @@ function BudgetPage() {
   return <BudgetView onBack={() => navigate('/dashboard')} />;
 }
 
-function DashPage({ user, role }) {
-  const navigate = useNavigate();
-  const openMod = (m) => {
-    if (m.id === "presup") navigate('/dashboard/presupuesto');
-    else navigate(`/dashboard/calc/${m.id}`);
-  };
-  return <Dashboard onOpen={openMod} user={user} role={role} />;
-}
-
+// ── AppShell — núcleo de la app con estado de navegación ─────
 function AppShell({ user, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Role state simulado — por defecto usa el rol del onboarding, alternables para testing
-  const [role, setRole] = useState(user?.role || 'profesional');
-  const toggleRole = () => setRole(r => r === 'profesional' ? 'instalador' : 'profesional');
+  // Estado de vista interna (reemplaza routing complejo para vistas del dashboard)
+  const [view, setView] = useState({ id: 'dashboard', project: null });
 
-  const path = location.pathname;
-  let activeId = null;
-  if (path.includes('/calc/')) activeId = path.split('/calc/')[1];
-  else if (path.includes('/presupuesto')) activeId = 'presup';
+  // Role state — por defecto usa el rol del onboarding
+  const [role, setRole] = useState(user?.role || 'profesional');
+  const toggleRole = () => {
+    setRole(r => r === 'profesional' ? 'instalador' : 'profesional');
+    setView({ id: 'dashboard', project: null });
+  };
+
+  // Navegación interna: go('proyectos') / go('proyecto-detalle', { project })
+  const go = (id, extra = {}) => {
+    setView({ id, project: null, ...extra });
+  };
+
+  // Abre un módulo de cálculo (con soporte especial para agua y presupuesto)
+  const openModule = (mod, project = null) => {
+    if (mod.id === 'agua') {
+      setView({ id: 'modulo-agua', project });
+    } else if (mod.id === 'presup') {
+      navigate('/dashboard/presupuesto');
+    } else {
+      navigate(`/dashboard/calc/${mod.id}`);
+    }
+  };
+
+  // Determina qué item del sidebar está activo
+  const sidebarActiveId = (() => {
+    const path = location.pathname;
+    if (path.includes('/calc/') || path.includes('/presupuesto')) return null;
+    return view.id;
+  })();
+
+  // Renderiza la vista central según el estado
+  const renderMain = () => {
+    // Si estamos en una ruta de URL (calc/presup), el router la maneja
+    const path = location.pathname;
+    if (path.includes('/calc/') || path.includes('/presupuesto')) return null;
+
+    switch (view.id) {
+      case 'dashboard':
+        return (
+          <Dashboard
+            onOpen={openModule}
+            onNavigate={go}
+            user={user}
+            role={role}
+          />
+        );
+      case 'proyectos':
+        return <MisProyectosView onNavigate={go} />;
+      case 'proyecto-detalle':
+        return (
+          <DetalleProyectoView
+            project={view.project}
+            onNavigate={go}
+            onModuleOpen={openModule}
+          />
+        );
+      case 'modulo-agua':
+        return (
+          <ModuloAgua
+            project={view.project}
+            onBack={() => view.project ? go('proyecto-detalle', { project: view.project }) : go('dashboard')}
+          />
+        );
+      case 'presupuestos':
+        return <PlaceholderView title="Historial de Presupuestos" onNavigate={go} />;
+      case 'precios':
+        return <PlaceholderView title="Base de Precios" onNavigate={go} />;
+      case 'config':
+        return <PlaceholderView title="Configuración" onNavigate={go} />;
+      case 'cotizaciones':
+        return <PlaceholderView title="Mis Cotizaciones" onNavigate={go} />;
+      case 'herramientas':
+        return <PlaceholderView title="Herramientas" onNavigate={go} />;
+      default:
+        return <Dashboard onOpen={openModule} onNavigate={go} user={user} role={role} />;
+    }
+  };
 
   return (
     <div className="app">
       <Header
-        onLogoClick={() => navigate('/dashboard')}
+        onLogoClick={() => go('dashboard')}
         user={user}
         onLogout={onLogout}
         role={role}
         onToggleRole={toggleRole}
       />
       <div className="layout">
-        <Sidebar activeId={activeId} role={role} />
+        <Sidebar activeId={sidebarActiveId} role={role} onNavigate={go} />
         <main className="main">
           <AnimatePresence mode="wait">
-            <motion.div
-              key={location.pathname + role}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.22, ease: 'easeOut' }}
-              style={{ height: '100%' }}
-            >
-              <Routes location={location}>
-                <Route path="/" element={<DashPage user={user} role={role} />} />
-                <Route path="/calc/:moduleId" element={<CalcPageWrapper />} />
-                <Route path="/presupuesto" element={<BudgetPage />} />
-              </Routes>
-            </motion.div>
+            <Routes location={location}>
+              <Route
+                path="/"
+                element={
+                  <motion.div
+                    key={view.id + (view.project?.id || '')}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.22, ease: 'easeOut' }}
+                    style={{ height: '100%' }}
+                  >
+                    {renderMain()}
+                  </motion.div>
+                }
+              />
+              <Route
+                path="/calc/:moduleId"
+                element={
+                  <motion.div
+                    key={location.pathname}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.22, ease: 'easeOut' }}
+                    style={{ height: '100%' }}
+                  >
+                    <CalcPageWrapper />
+                  </motion.div>
+                }
+              />
+              <Route
+                path="/presupuesto"
+                element={
+                  <motion.div
+                    key="presupuesto"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.22, ease: 'easeOut' }}
+                    style={{ height: '100%' }}
+                  >
+                    <BudgetPage />
+                  </motion.div>
+                }
+              />
+            </Routes>
           </AnimatePresence>
         </main>
       </div>
@@ -160,8 +280,8 @@ export default function App() {
   };
 
   const isLanding = location.pathname === '/';
-  const isLogin = location.pathname === '/login';
-  const isAdmin = location.pathname === '/admin';
+  const isLogin   = location.pathname === '/login';
+  const isAdmin   = location.pathname === '/admin';
 
   return (
     <AnimatePresence mode="wait">

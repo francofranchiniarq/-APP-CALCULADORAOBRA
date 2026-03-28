@@ -1,40 +1,6 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ALL_MODULES } from '../modules/calculators';
-
-// ═══════════════════════════════════════════════════════════════
-// Mock data — reemplazar por API cuando exista backend
-// ═══════════════════════════════════════════════════════════════
-
-const MOCK_PROJECTS = [
-  {
-    id: 1, name: "Edificio Rosario Centro", type: "Edificio Residencial",
-    status: "activo", budget: 185000000, progress: 65, lastUpdate: "hace 2 días",
-    modules: ['estruct', 'agua', 'cloacal', 'gas', 'electrico', 'presup', 'gantt'],
-  },
-  {
-    id: 2, name: "Casa Ibarlucea", type: "Vivienda Unifamiliar",
-    status: "activo", budget: 42000000, progress: 30, lastUpdate: "hace 1 semana",
-    modules: ['agua', 'cloacal', 'electrico', 'presup'],
-  },
-  {
-    id: 3, name: "Local Comercial Pellegrini", type: "Comercial",
-    status: "presupuesto", budget: 28000000, progress: 0, lastUpdate: "hace 3 días",
-    modules: ['electrico', 'termo', 'presup'],
-  },
-  {
-    id: 4, name: "Refacción PH Pichincha", type: "Reforma",
-    status: "finalizado", budget: 15000000, progress: 100, lastUpdate: "hace 2 semanas",
-    modules: ['seco', 'agua', 'presup'],
-  },
-];
-
-const MOCK_QUOTES = [
-  { id: 1, client: "García, Familia",      address: "Av. Pellegrini 1240", date: "25/03/2026", total: 485000,  status: "enviado"   },
-  { id: 2, client: "Martínez, Roberto",    address: "San Martín 780",      date: "22/03/2026", total: 320000,  status: "aprobado"  },
-  { id: 3, client: "López Construcciones", address: "Córdoba 2100",        date: "18/03/2026", total: 1240000, status: "pendiente" },
-  { id: 4, client: "Sánchez, María",       address: "Bv. Oroño 450",       date: "15/03/2026", total: 195000,  status: "enviado"   },
-];
+import { MOCK_PROJECTS, MOCK_QUOTES, fmtPeso } from '../data/mockData';
 
 // Módulos desbloqueados para instalador (resto = upsell)
 const INSTALADOR_UNLOCKED = ['gas', 'agua', 'cloacal', 'seco', 'electrico', 'termo', 'presup'];
@@ -47,9 +13,6 @@ const RUBRO_HERO = {
   electrico:     { modId: 'electrico', cta: 'Nueva Cotización Eléctrica',     desc: 'Conductores · Protecciones · Luminotecnia' },
   termomecanico: { modId: 'termo',     cta: 'Nueva Cotización Termomecánica', desc: 'Balance térmico · Selección de equipos' },
 };
-
-// ═══ Utilidades ═══
-const fmtPeso = (n) => '$ ' + n.toLocaleString('es-AR', { maximumFractionDigits: 0 });
 
 // ═══════════════════════════════════════════════════════════════
 // FLUJO 1 — PROFESIONAL / CONSTRUCTORA
@@ -89,111 +52,62 @@ function ProjectCard({ project, onClick, index }) {
   );
 }
 
-function ProjectModulesView({ project, onOpen, onBack }) {
-  const mods = ALL_MODULES.filter(m => project.modules.includes(m.id));
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: 14 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -14 }}
-      transition={{ duration: 0.22 }}
-    >
-      <button className="calc-back" onClick={onBack}>← Volver a proyectos</button>
-
-      <div className="proj-context-bar">
-        <div className="proj-context-info">
-          <div className="proj-context-name">{project.name}</div>
-          <div className="proj-context-meta">{project.type} · {project.progress}% completado</div>
-        </div>
-        <span className={`proj-status-pill ${project.status === 'activo' ? 'proj-status-activo' : 'proj-status-finalizado'}`}>
-          {project.status === 'activo' ? 'Activo' : 'Finalizado'}
-        </span>
-      </div>
-
-      <div className="dash-section-label">Módulos de esta obra</div>
-      <div className="mod-grid">
-        {mods.map((m, i) => (
-          <motion.div
-            key={m.id}
-            className="mod-card"
-            onClick={() => onOpen(m)}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2, delay: i * 0.04 }}
-            whileTap={{ scale: 0.97 }}
-          >
-            <div className="mc-bar" style={{ background: m.color }} />
-            <div className="mc-icon" style={{ background: `${m.color}14` }}>{m.icon}</div>
-            <div className="mc-name">{m.name}</div>
-            <div className="mc-sub">{m.sub}</div>
-            <div className="mc-arrow">→</div>
-          </motion.div>
-        ))}
-      </div>
-    </motion.div>
-  );
-}
-
-function DashboardProfesional({ onOpen }) {
-  const [selectedProject, setSelectedProject] = useState(null);
-
+function DashboardProfesional({ onOpen, onNavigate }) {
   const activeCount  = MOCK_PROJECTS.filter(p => p.status === 'activo').length;
   const presupCount  = MOCK_PROJECTS.filter(p => p.status === 'presupuesto').length;
   const totalBudget  = MOCK_PROJECTS.filter(p => p.status !== 'finalizado')
                                     .reduce((s, p) => s + p.budget, 0);
 
+  const handleProjectClick = (project) => {
+    onNavigate('proyecto-detalle', { project });
+  };
+
   return (
-    <AnimatePresence mode="wait">
-      {selectedProject ? (
-        <ProjectModulesView
-          key="detail"
-          project={selectedProject}
-          onOpen={onOpen}
-          onBack={() => setSelectedProject(null)}
-        />
-      ) : (
-        <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-          <div className="dash-greeting">Panel de Control</div>
-          <div className="dash-sub">Gestión de proyectos · Arquitectura y Construcción</div>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
+      <div className="dash-greeting">Panel de Control</div>
+      <div className="dash-sub">Gestión de proyectos · Arquitectura y Construcción</div>
 
-          <div className="stat-cards">
-            <div className="stat-card">
-              <div className="stat-big" style={{ color: "var(--green)" }}>{activeCount}</div>
-              <div className="stat-label">Proyectos activos</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-big" style={{ color: "var(--accent)" }}>{presupCount}</div>
-              <div className="stat-label">En presupuesto</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-big" style={{ color: "var(--text)", fontSize: 24 }}>
-                {fmtPeso(totalBudget / 1000000)}M
-              </div>
-              <div className="stat-label">Costo total est.</div>
-            </div>
+      <div className="stat-cards">
+        <div className="stat-card">
+          <div className="stat-big" style={{ color: "var(--green)" }}>{activeCount}</div>
+          <div className="stat-label">Proyectos activos</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-big" style={{ color: "var(--accent)" }}>{presupCount}</div>
+          <div className="stat-label">En presupuesto</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-big" style={{ color: "var(--text)", fontSize: 24 }}>
+            {fmtPeso(totalBudget / 1000000)}M
           </div>
+          <div className="stat-label">Costo total est.</div>
+        </div>
+      </div>
 
-          <div className="dash-section-label">Mis proyectos</div>
-          <div className="proj-grid">
-            {MOCK_PROJECTS.map((p, i) => (
-              <ProjectCard key={p.id} project={p} onClick={setSelectedProject} index={i} />
-            ))}
-            <motion.div
-              className="proj-card proj-card-new"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.22, delay: MOCK_PROJECTS.length * 0.05 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <div className="proj-card-new-inner">
-                <div className="proj-card-new-icon">+</div>
-                <div className="proj-card-new-label">Nuevo proyecto</div>
-              </div>
-            </motion.div>
+      <div className="dash-section-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span>Mis proyectos recientes</span>
+        <button className="quote-action-link" onClick={() => onNavigate('proyectos')}>
+          Ver todos →
+        </button>
+      </div>
+      <div className="proj-grid">
+        {MOCK_PROJECTS.slice(0, 4).map((p, i) => (
+          <ProjectCard key={p.id} project={p} onClick={handleProjectClick} index={i} />
+        ))}
+        <motion.div
+          className="proj-card proj-card-new"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.22, delay: MOCK_PROJECTS.length * 0.05 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <div className="proj-card-new-inner">
+            <div className="proj-card-new-icon">+</div>
+            <div className="proj-card-new-label">Nuevo proyecto</div>
           </div>
         </motion.div>
-      )}
-    </AnimatePresence>
+      </div>
+    </motion.div>
   );
 }
 
@@ -360,9 +274,9 @@ function DashboardInstalador({ onOpen, user }) {
 // ═══════════════════════════════════════════════════════════════
 // Export — switch por rol
 // ═══════════════════════════════════════════════════════════════
-export default function Dashboard({ onOpen, user, role }) {
+export default function Dashboard({ onOpen, onNavigate, user, role }) {
   if (role === 'instalador') {
     return <DashboardInstalador onOpen={onOpen} user={user} />;
   }
-  return <DashboardProfesional onOpen={onOpen} />;
+  return <DashboardProfesional onOpen={onOpen} onNavigate={onNavigate} />;
 }
