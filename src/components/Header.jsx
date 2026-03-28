@@ -4,6 +4,19 @@ const ROLE_LABELS = {
   empresa: 'Empresa',
 };
 
+function UserAvatar({ user }) {
+  const name = user?.nombre || user?.email || 'U';
+  const initial = name.charAt(0).toUpperCase();
+  return (
+    <div className="hdr-avatar" title={user?.email || ''}>
+      {user?.avatar_url
+        ? <img src={user.avatar_url} alt={initial} className="hdr-avatar-img" referrerPolicy="no-referrer" />
+        : <span>{initial}</span>
+      }
+    </div>
+  );
+}
+
 export default function Header({ onLogoClick, user, onLogout, role, onToggleRole }) {
   const roleLabel = ROLE_LABELS[role] || 'PRO';
   const nextRole  = role === 'instalador' ? 'Profesional' : 'Instalador';
@@ -22,7 +35,6 @@ export default function Header({ onLogoClick, user, onLogout, role, onToggleRole
       </div>
 
       <div className="hdr-r">
-        {/* Toggle temporal para testing de roles */}
         <button className="hdr-role-toggle" onClick={onToggleRole} title="Cambiar vista de rol (testing)">
           <span className="hdr-role-toggle-dot" />
           Ver como {nextRole} →
@@ -31,13 +43,16 @@ export default function Header({ onLogoClick, user, onLogout, role, onToggleRole
         <div className="hdr-pill">{roleLabel}</div>
 
         {user && (
-          <button className="hdr-logout" onClick={onLogout} title="Cerrar sesión">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-              <polyline points="16 17 21 12 16 7"/>
-              <line x1="21" y1="12" x2="9" y2="12"/>
-            </svg>
-          </button>
+          <>
+            <UserAvatar user={user} />
+            <button className="hdr-logout" onClick={onLogout} title="Cerrar sesión">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+            </button>
+          </>
         )}
       </div>
     </header>

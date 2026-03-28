@@ -308,14 +308,31 @@ export default function App() {
   const loadProfile = useCallback(async (userId, attempt = 1) => {
     try {
       const profile = await getProfile(userId);
-      setUser(profile);
+      // Enriquecer con datos de la sesión de Google si faltan
+      const { data: { user: sbUser } } = await supabase.auth.getUser();
+      const meta = sbUser?.user_metadata || {};
+      setUser({
+        ...profile,
+        email:      profile.email      || sbUser?.email,
+        nombre:     profile.nombre     || meta.full_name || meta.name || sbUser?.email?.split('@')[0],
+        avatar_url: profile.avatar_url || meta.avatar_url || meta.picture,
+      });
     } catch {
       if (attempt < 3) {
         setTimeout(() => loadProfile(userId, attempt + 1), 800 * attempt);
-      } else {
-        // Fallback mínimo si el perfil no se creó aún
-        setUser({ id: userId, role: 'profesional', plan: 'starter' });
+        return;
       }
+      // Fallback: usar datos de la sesión directamente
+      const { data: { user: sbUser } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
+      const meta = sbUser?.user_metadata || {};
+      setUser({
+        id: userId,
+        role: 'profesional',
+        plan: 'starter',
+        email:      sbUser?.email,
+        nombre:     meta.full_name || meta.name || sbUser?.email?.split('@')[0] || 'Usuario',
+        avatar_url: meta.avatar_url || meta.picture || null,
+      });
     } finally {
       setAuthReady(true);
     }
