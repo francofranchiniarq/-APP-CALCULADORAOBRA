@@ -1,6 +1,9 @@
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { ALL_MODULES } from '../modules/calculators';
-import { MOCK_PROJECTS, MOCK_QUOTES, fmtPeso } from '../data/mockData';
+import { getObras, crearObra } from '../modules/obras';
+import { MOCK_QUOTES, fmtPeso } from '../data/mockData';
+import ObraFormModal from './ObraFormModal';
 
 // Módulos desbloqueados para instalador (resto = upsell)
 const INSTALADOR_UNLOCKED = ['gas', 'agua', 'cloacal', 'seco', 'electrico', 'termo', 'presup'];
@@ -14,52 +17,83 @@ const RUBRO_HERO = {
   termomecanico: { modId: 'termo',     cta: 'Nueva Cotización Termomecánica', desc: 'Balance térmico · Selección de equipos' },
 };
 
+function timeAgo(dateStr) {
+  if (!dateStr) return '';
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'hace un momento';
+  if (mins < 60) return `hace ${mins} min`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `hace ${hours}h`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return 'hace 1 día';
+  if (days < 7) return `hace ${days} días`;
+  const weeks = Math.floor(days / 7);
+  if (weeks === 1) return 'hace 1 semana';
+  return `hace ${weeks} semanas`;
+}
+
 // ═══════════════════════════════════════════════════════════════
 // FLUJO 1 — PROFESIONAL / CONSTRUCTORA
 // ═══════════════════════════════════════════════════════════════
 
-function ProjectCard({ project, onClick, index }) {
+function ProjectCard({ obra, onClick, index }) {
   const statusMap = {
     activo:      { cls: 'proj-status-activo',      label: 'Activo'       },
     presupuesto: { cls: 'proj-status-presupuesto',  label: 'Presupuesto'  },
     finalizado:  { cls: 'proj-status-finalizado',   label: 'Finalizado'   },
   };
-  const { cls, label } = statusMap[project.status] || {};
+  const { cls, label } = statusMap[obra.estado] || { cls: '', label: obra.estado };
 
   return (
     <motion.div
       className="proj-card"
-      onClick={() => onClick(project)}
+      onClick={() => onClick(obra)}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.22, delay: index * 0.05 }}
       whileTap={{ scale: 0.98 }}
     >
       <div className="proj-card-top">
-        <div className="proj-type">{project.type}</div>
+        <div className="proj-type">{obra.tipo || 'Obra'}</div>
         <span className={`proj-status-pill ${cls}`}>{label}</span>
       </div>
-      <div className="proj-name">{project.name}</div>
-      <div className="proj-update">Actualizado {project.lastUpdate}</div>
+      <div className="proj-name">{obra.nombre}</div>
+      <div className="proj-update">Actualizado {timeAgo(obra.actualizada)}</div>
       <div className="proj-progress-bar">
-        <div className="proj-progress-fill" style={{ width: `${project.progress}%` }} />
+        <div className="proj-progress-fill" style={{ width: `${obra.avance || 0}%` }} />
       </div>
       <div className="proj-progress-row">
-        <span className="proj-progress-label">{project.progress}% completado</span>
-        <span className="proj-budget">{fmtPeso(project.budget)}</span>
+        <span className="proj-progress-label">{obra.avance || 0}% completado</span>
+        <span className="proj-budget">{fmtPeso(obra.presupuesto || 0)}</span>
       </div>
     </motion.div>
   );
 }
 
 function DashboardProfesional({ onOpen, onNavigate }) {
-  const activeCount  = MOCK_PROJECTS.filter(p => p.status === 'activo').length;
-  const presupCount  = MOCK_PROJECTS.filter(p => p.status === 'presupuesto').length;
-  const totalBudget  = MOCK_PROJECTS.filter(p => p.status !== 'finalizado')
-                                    .reduce((s, p) => s + p.budget, 0);
+  const [obras, setObras] = useState([]);
+  const [showForm, setShowForm] = useState(false);
 
-  const handleProjectClick = (project) => {
-    onNavigate('proyecto-detalle', { project });
+  const loadObras = useCallback(() => {
+    setObras(getObras());
+  }, []);
+
+  useEffect(() => { loadObras(); }, [loadObras]);
+
+  const activeCount  = obras.filter(o => o.estado === 'activo').length;
+  const presupCount  = obras.filter(o => o.estado === 'presupuesto').length;
+  const totalBudget  = obras.filter(o => o.estado !== 'finalizado')
+                            .reduce((s, o) => s + (o.presupuesto || 0), 0);
+
+  const handleProjectClick = (obra) => {
+    onNavigate('proyecto-detalle', { project: obra });
+  };
+
+  const handleCreate = (formData) => {
+    crearObra(formData);
+    loadObras();
+    setShowForm(false);
   };
 
   return (
@@ -78,7 +112,7 @@ function DashboardProfesional({ onOpen, onNavigate }) {
         </div>
         <div className="stat-card">
           <div className="stat-big" style={{ color: "var(--text)", fontSize: 24 }}>
-            {fmtPeso(totalBudget / 1000000)}M
+            {totalBudget >= 1000000 ? fmtPeso(totalBudget / 1000000) + 'M' : fmtPeso(totalBudget)}
           </div>
           <div className="stat-label">Costo total est.</div>
         </div>
@@ -91,14 +125,15 @@ function DashboardProfesional({ onOpen, onNavigate }) {
         </button>
       </div>
       <div className="proj-grid">
-        {MOCK_PROJECTS.slice(0, 4).map((p, i) => (
-          <ProjectCard key={p.id} project={p} onClick={handleProjectClick} index={i} />
+        {obras.slice(0, 4).map((o, i) => (
+          <ProjectCard key={o.id} obra={o} onClick={handleProjectClick} index={i} />
         ))}
         <motion.div
           className="proj-card proj-card-new"
+          onClick={() => setShowForm(true)}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.22, delay: MOCK_PROJECTS.length * 0.05 }}
+          transition={{ duration: 0.22, delay: Math.min(obras.length, 4) * 0.05 }}
           whileTap={{ scale: 0.98 }}
         >
           <div className="proj-card-new-inner">
@@ -107,6 +142,19 @@ function DashboardProfesional({ onOpen, onNavigate }) {
           </div>
         </motion.div>
       </div>
+
+      {obras.length === 0 && (
+        <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text3)', fontSize: 13, fontWeight: 600 }}>
+          No tenés proyectos todavía. Creá el primero.
+        </div>
+      )}
+
+      <ObraFormModal
+        open={showForm}
+        obra={null}
+        onSave={handleCreate}
+        onClose={() => setShowForm(false)}
+      />
     </motion.div>
   );
 }

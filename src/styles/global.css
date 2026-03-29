@@ -705,6 +705,102 @@ body {
 .agua-empty-icon { font-size: 36px; }
 .agua-empty-text { font-size: 14px; color: var(--text2); font-weight: 600; }
 
+/* ═══ Modal ═══ */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(26, 23, 20, 0.45); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.modal-panel {
+  background: var(--card); border-radius: var(--rp); box-shadow: var(--shl);
+  width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto;
+}
+.modal-panel-sm { max-width: 400px; }
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px 0;
+}
+.modal-header h2 { font-size: 18px; font-weight: 800; color: var(--text); }
+.modal-close {
+  width: 32px; height: 32px; border-radius: 10px; border: none;
+  background: transparent; color: var(--text3); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.12s, color 0.12s;
+}
+.modal-close:hover { background: var(--bg); color: var(--text); }
+.modal-body { padding: 20px 24px 24px; }
+.modal-field { margin-bottom: 16px; }
+.modal-field label {
+  display: block; font-size: 11px; font-weight: 700; color: var(--text2);
+  text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;
+}
+.modal-field input,
+.modal-field select {
+  width: 100%; padding: 10px 14px; border: 1.5px solid var(--border);
+  border-radius: 12px; font-size: 14px; font-family: 'Inter', sans-serif;
+  color: var(--text); background: var(--bg); transition: border-color 0.15s;
+}
+.modal-field input:focus,
+.modal-field select:focus {
+  outline: none; border-color: var(--accent);
+}
+.modal-field input::placeholder { color: var(--text3); }
+.modal-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.modal-modules-grid {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.modal-mod-chip {
+  padding: 7px 14px; border-radius: 10px;
+  border: 1.5px solid var(--border); background: transparent;
+  font-size: 12px; font-weight: 600; font-family: 'Inter', sans-serif;
+  color: var(--text2); cursor: pointer; transition: all 0.15s;
+}
+.modal-mod-chip:hover { border-color: var(--accent); color: var(--accent); }
+.modal-mod-chip.active {
+  background: var(--abg); border-color: var(--accent); color: var(--accent); font-weight: 700;
+}
+.modal-actions {
+  display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;
+}
+.modal-btn-secondary {
+  padding: 10px 20px; border-radius: 12px;
+  border: 1.5px solid var(--border); background: transparent;
+  font-size: 13px; font-weight: 700; font-family: 'Inter', sans-serif;
+  color: var(--text2); cursor: pointer; transition: all 0.15s;
+}
+.modal-btn-secondary:hover { background: var(--bg); color: var(--text); }
+.modal-btn-primary {
+  padding: 10px 20px; border-radius: 12px; border: none;
+  background: var(--accent); color: #fff;
+  font-size: 13px; font-weight: 700; font-family: 'Inter', sans-serif;
+  cursor: pointer; transition: filter 0.15s;
+}
+.modal-btn-primary:hover:not(:disabled) { filter: brightness(0.88); }
+.modal-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.modal-btn-danger {
+  padding: 10px 20px; border-radius: 12px; border: none;
+  background: var(--red); color: #fff;
+  font-size: 13px; font-weight: 700; font-family: 'Inter', sans-serif;
+  cursor: pointer; transition: filter 0.15s;
+}
+.modal-btn-danger:hover { filter: brightness(0.88); }
+.modal-confirm-msg { font-size: 14px; color: var(--text2); line-height: 1.5; margin-bottom: 4px; }
+
+/* ─── Project row action buttons ─── */
+.project-row-actions {
+  display: flex; gap: 6px; flex-shrink: 0;
+}
+.proj-action-btn {
+  width: 32px; height: 32px; border-radius: 8px;
+  border: 1.5px solid var(--border2); background: transparent;
+  color: var(--text3); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s;
+}
+.proj-action-btn:hover { background: var(--bg); color: var(--text); border-color: var(--border); }
+.proj-action-btn.danger:hover { background: rgba(185,28,28,0.08); color: var(--red); border-color: var(--red); }
+
 /* ═══ Responsive ═══ */
 @media (max-width: 768px) {
   .side { display: none; }
@@ -714,4 +810,6 @@ body {
   .input-grid { grid-template-columns: 1fr; }
   .calc-header-card { flex-direction: column; text-align: center; }
   .big-result { flex-direction: column; text-align: center; gap: 16px; }
+  .modal-row-2 { grid-template-columns: 1fr; }
+  .modal-panel { max-width: 100%; }
 }

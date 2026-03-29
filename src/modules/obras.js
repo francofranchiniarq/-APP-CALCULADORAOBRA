@@ -40,13 +40,18 @@ export function getObra(obraId) {
   return load().find(o => o.id === obraId) || null;
 }
 
-export function crearObra({ nombre, direccion = "", cliente = "" }) {
+export function crearObra({ nombre, direccion = "", cliente = "", tipo = "Vivienda Unifamiliar", estado = "activo", presupuesto = 0, avance = 0, modulos = [] }) {
   const obras = load();
   const nueva = {
     id: uid(),
     nombre,
     direccion,
     cliente,
+    tipo,
+    estado,
+    presupuesto,
+    avance,
+    modulos,
     creada: new Date().toISOString(),
     actualizada: new Date().toISOString(),
     calculos: [],
