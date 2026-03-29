@@ -183,7 +183,7 @@ const FAQ_ITEMS = [
   },
 ];
 
-export default function LandingPage({ onStart }) {
+export default function LandingPage({ onStart, onLogin }) {
   const [wordIndex, setWordIndex] = useState(0);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [openFaq, setOpenFaq] = useState(null);
@@ -224,7 +224,8 @@ export default function LandingPage({ onStart }) {
           <a href="#features" className="lp-nav-link">Funciones</a>
           <a href="#modules" className="lp-nav-link">Módulos</a>
           <a href="#pricing" className="lp-nav-link">Planes</a>
-          <button className="lp-nav-cta" onClick={onStart}>Ingresar</button>
+          <button className="lp-nav-link" onClick={onLogin} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>Iniciar sesión</button>
+          <button className="lp-nav-cta" onClick={onStart}>Registrarse</button>
         </div>
       </nav>
 

@@ -96,7 +96,7 @@ function BudgetPage() {
 }
 
 // ── AppShell — núcleo de la app con estado de navegación ─────
-function AppShell({ user, onLogout }) {
+function AppShell({ user, onLogout, onUpdateUser }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -225,6 +225,7 @@ function AppShell({ user, onLogout }) {
         onLogoClick={() => go('dashboard')}
         user={user}
         onLogout={onLogout}
+        onUpdateUser={onUpdateUser}
         role={role}
         onToggleRole={toggleRole}
       />
@@ -313,10 +314,19 @@ export default function App() {
     }
   }, []);
 
-  const handleStartLogin = () => navigate('/login');
+  // Modo de login: 'onboarding' (cuestionario) o 'login' (directo)
+  const [loginMode, setLoginMode] = useState('onboarding');
+
+  const handleStartOnboarding = () => { setLoginMode('onboarding'); navigate('/login'); };
+  const handleStartLogin = () => { setLoginMode('login'); navigate('/login'); };
 
   const handleLoginComplete = (userData) => {
-    const profile = { ...userData, loginAt: Date.now() };
+    const profile = {
+      ...userData,
+      name: userData.name || userData.email?.split('@')[0] || '',
+      plan: userData.plan || 'free',
+      loginAt: Date.now(),
+    };
     try { localStorage.setItem('metriq_user', JSON.stringify(profile)); } catch {}
     setUser(profile);
     navigate('/dashboard');
@@ -326,6 +336,12 @@ export default function App() {
     try { localStorage.removeItem('metriq_user'); } catch {}
     setUser(null);
     navigate('/');
+  };
+
+  const handleUpdateUser = (updates) => {
+    const updated = { ...user, ...updates };
+    try { localStorage.setItem('metriq_user', JSON.stringify(updated)); } catch {}
+    setUser(updated);
   };
 
   const isLanding = location.pathname === '/';
@@ -340,16 +356,16 @@ export default function App() {
         </motion.div>
       ) : isLanding ? (
         <motion.div key="landing" {...pageTransition}>
-          <LandingPage onStart={handleStartLogin} />
+          <LandingPage onStart={handleStartOnboarding} onLogin={handleStartLogin} />
         </motion.div>
       ) : isLogin ? (
         <motion.div key="login" {...pageTransition}>
-          <OnboardingLogin onComplete={handleLoginComplete} />
+          <OnboardingLogin onComplete={handleLoginComplete} initialMode={loginMode} />
         </motion.div>
       ) : (
         <motion.div key="dashboard" {...pageTransition}>
           <Routes location={location}>
-            <Route path="/dashboard/*" element={<AppShell user={user} onLogout={handleLogout} />} />
+            <Route path="/dashboard/*" element={<AppShell user={user} onLogout={handleLogout} onUpdateUser={handleUpdateUser} />} />
           </Routes>
         </motion.div>
       )}
