@@ -8,7 +8,7 @@ import CalcView from './components/CalcView';
 import BudgetView from './components/BudgetView';
 import LandingPage from './components/LandingPage';
 import OnboardingLogin from './components/OnboardingLogin';
-import LeadsPanel from './components/LeadsPanel';
+import AdminPanel from './components/AdminPanel';
 import MisProyectosView from './components/views/MisProyectosView';
 import DetalleProyectoView from './components/views/DetalleProyectoView';
 import ModuloAgua from './components/ModuloAgua';
@@ -299,7 +299,7 @@ export default function App() {
     <AnimatePresence mode="wait">
       {isAdmin ? (
         <motion.div key="admin" {...pageTransition}>
-          <LeadsPanel onBack={() => navigate('/dashboard')} />
+          <AdminPanel onBack={() => navigate('/dashboard')} />
         </motion.div>
       ) : isLanding ? (
         <motion.div key="landing" {...pageTransition}>
