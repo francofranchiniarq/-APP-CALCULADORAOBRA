@@ -3,11 +3,8 @@ import { motion } from 'framer-motion';
 import { ALL_MODULES } from '../modules/calculators';
 import { getObras, crearObra } from '../modules/obras';
 import { MOCK_QUOTES, fmtPeso } from '../data/mockData';
+import { getUserPlan, canAccessModule, canCreateProject, PRO_MODULES } from '../modules/plans';
 import ObraFormModal from './ObraFormModal';
-
-// Módulos desbloqueados para instalador (resto = upsell)
-const INSTALADOR_UNLOCKED = ['gas', 'agua', 'cloacal', 'seco', 'electrico', 'termo', 'presup'];
-const INSTALADOR_LOCKED   = ['estruct', 'gantt'];
 
 // Hero CTA por rubro del instalador
 const RUBRO_HERO = {
@@ -32,6 +29,13 @@ function timeAgo(dateStr) {
   if (weeks === 1) return 'hace 1 semana';
   return `hace ${weeks} semanas`;
 }
+
+const LockIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round">
+    <rect x="3" y="11" width="18" height="11" rx="2"/>
+    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+  </svg>
+);
 
 // ═══════════════════════════════════════════════════════════════
 // FLUJO 1 — PROFESIONAL / CONSTRUCTORA
@@ -71,9 +75,10 @@ function ProjectCard({ obra, onClick, index }) {
   );
 }
 
-function DashboardProfesional({ onOpen, onNavigate }) {
+function DashboardProfesional({ onOpen, onNavigate, user, onUpgrade }) {
   const [obras, setObras] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const plan = getUserPlan(user);
 
   const loadObras = useCallback(() => {
     setObras(getObras());
@@ -90,16 +95,32 @@ function DashboardProfesional({ onOpen, onNavigate }) {
     onNavigate('proyecto-detalle', { project: obra });
   };
 
+  const handleNewProject = () => {
+    if (!canCreateProject(user, obras.length)) {
+      onUpgrade('projects');
+      return;
+    }
+    setShowForm(true);
+  };
+
   const handleCreate = (formData) => {
     crearObra(formData);
     loadObras();
     setShowForm(false);
   };
 
+  // Split modules into accessible and locked based on user plan
+  const allMods = ALL_MODULES;
+  const unlockedMods = allMods.filter(m => canAccessModule(user, m.id));
+  const lockedMods = allMods.filter(m => !canAccessModule(user, m.id));
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
       <div className="dash-greeting">Panel de Control</div>
-      <div className="dash-sub">Gestión de proyectos · Arquitectura y Construcción</div>
+      <div className="dash-sub">
+        Gestión de proyectos · Arquitectura y Construcción
+        {plan.id !== 'free' && <span className="dash-plan-badge" style={{ background: plan.bg, color: plan.color }}>{plan.label}</span>}
+      </div>
 
       <div className="stat-cards">
         <div className="stat-card">
@@ -130,7 +151,7 @@ function DashboardProfesional({ onOpen, onNavigate }) {
         ))}
         <motion.div
           className="proj-card proj-card-new"
-          onClick={() => setShowForm(true)}
+          onClick={handleNewProject}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.22, delay: Math.min(obras.length, 4) * 0.05 }}
@@ -139,6 +160,9 @@ function DashboardProfesional({ onOpen, onNavigate }) {
           <div className="proj-card-new-inner">
             <div className="proj-card-new-icon">+</div>
             <div className="proj-card-new-label">Nuevo proyecto</div>
+            {plan.maxProjects !== Infinity && (
+              <div className="proj-card-new-limit">{obras.length}/{plan.maxProjects}</div>
+            )}
           </div>
         </motion.div>
       </div>
@@ -147,6 +171,34 @@ function DashboardProfesional({ onOpen, onNavigate }) {
         <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text3)', fontSize: 13, fontWeight: 600 }}>
           No tenés proyectos todavía. Creá el primero.
         </div>
+      )}
+
+      {/* Módulos Pro bloqueados — upsell para profesional */}
+      {lockedMods.length > 0 && (
+        <>
+          <div className="locked-section-label">
+            <span>Módulos Pro</span>
+            <span className="lock-badge">Plan Pro</span>
+          </div>
+          <div className="mod-grid">
+            {lockedMods.map((m) => (
+              <div key={m.id} className="mod-card-locked" onClick={() => onUpgrade('module', m.name)}>
+                <div className="mc-bar" style={{ background: 'var(--border)' }} />
+                <div className="mc-icon" style={{ background: 'var(--border2)', opacity: 0.6 }}>{m.icon}</div>
+                <div className="mc-name" style={{ color: 'var(--text3)' }}>{m.name}</div>
+                <div className="mc-sub">{m.sub}</div>
+                <div className="lock-overlay"><LockIcon /></div>
+              </div>
+            ))}
+          </div>
+          <div className="upsell-cta">
+            <div className="upsell-text">
+              <h4>Desbloqueá {lockedMods.map(m => m.name).join(', ')}</h4>
+              <p>Actualizá a Pro para acceder a todas las herramientas profesionales.</p>
+            </div>
+            <button className="upsell-btn" onClick={() => onUpgrade('general')}>Ver planes →</button>
+          </div>
+        </>
       )}
 
       <ObraFormModal
@@ -163,22 +215,16 @@ function DashboardProfesional({ onOpen, onNavigate }) {
 // FLUJO 2 — INSTALADOR / OFICIOS
 // ═══════════════════════════════════════════════════════════════
 
-const LockIcon = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round">
-    <rect x="3" y="11" width="18" height="11" rx="2"/>
-    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-  </svg>
-);
-
-function DashboardInstalador({ onOpen, user }) {
+function DashboardInstalador({ onOpen, user, onUpgrade }) {
   const rubro = user?.rubro || 'sanitario';
   const hero  = RUBRO_HERO[rubro] || RUBRO_HERO['sanitario'];
   const heroMod = ALL_MODULES.find(m => m.id === hero.modId);
+  const plan = getUserPlan(user);
 
   const unlockedMods = ALL_MODULES.filter(m =>
-    INSTALADOR_UNLOCKED.includes(m.id) && m.id !== hero.modId
+    canAccessModule(user, m.id) && m.id !== hero.modId
   );
-  const lockedMods = ALL_MODULES.filter(m => INSTALADOR_LOCKED.includes(m.id));
+  const lockedMods = ALL_MODULES.filter(m => !canAccessModule(user, m.id));
 
   const totalFacturado = MOCK_QUOTES.reduce((s, q) => s + q.total, 0);
   const aprobadas = MOCK_QUOTES.filter(q => q.status === 'aprobado').length;
@@ -293,11 +339,11 @@ function DashboardInstalador({ onOpen, user }) {
         <>
           <div className="locked-section-label">
             <span>Módulos Pro</span>
-            <span className="lock-badge">Plan Superior</span>
+            <span className="lock-badge">Plan Pro</span>
           </div>
           <div className="mod-grid">
             {lockedMods.map((m) => (
-              <div key={m.id} className="mod-card-locked">
+              <div key={m.id} className="mod-card-locked" onClick={() => onUpgrade('module', m.name)}>
                 <div className="mc-bar" style={{ background: 'var(--border)' }} />
                 <div className="mc-icon" style={{ background: 'var(--border2)', opacity: 0.6 }}>{m.icon}</div>
                 <div className="mc-name" style={{ color: 'var(--text3)' }}>{m.name}</div>
@@ -308,10 +354,10 @@ function DashboardInstalador({ onOpen, user }) {
           </div>
           <div className="upsell-cta">
             <div className="upsell-text">
-              <h4>Desbloqueá Estructuras y Cronograma de Obra</h4>
-              <p>Calculá losas, encofrado, acero y planificá con Gantt. Plan Profesional.</p>
+              <h4>Desbloqueá {lockedMods.map(m => m.name).join(', ')}</h4>
+              <p>Actualizá a Pro para acceder a todas las herramientas profesionales.</p>
             </div>
-            <button className="upsell-btn">Ver planes →</button>
+            <button className="upsell-btn" onClick={() => onUpgrade('general')}>Ver planes →</button>
           </div>
         </>
       )}
@@ -322,9 +368,9 @@ function DashboardInstalador({ onOpen, user }) {
 // ═══════════════════════════════════════════════════════════════
 // Export — switch por rol
 // ═══════════════════════════════════════════════════════════════
-export default function Dashboard({ onOpen, onNavigate, user, role }) {
+export default function Dashboard({ onOpen, onNavigate, user, role, onUpgrade }) {
   if (role === 'instalador') {
-    return <DashboardInstalador onOpen={onOpen} user={user} />;
+    return <DashboardInstalador onOpen={onOpen} user={user} onUpgrade={onUpgrade} />;
   }
-  return <DashboardProfesional onOpen={onOpen} onNavigate={onNavigate} />;
+  return <DashboardProfesional onOpen={onOpen} onNavigate={onNavigate} user={user} onUpgrade={onUpgrade} />;
 }

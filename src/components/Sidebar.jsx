@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { getUserPlan } from '../modules/plans';
 
 // ─── Iconos inline SVG para nav ───────────────────────────────
 const NavIcon = ({ type }) => {
@@ -19,7 +20,7 @@ const NavIcon = ({ type }) => {
 const NAV_PROFESIONAL = [
   { id: 'dashboard',     label: 'Dashboard',              icon: 'home'     },
   { id: 'proyectos',     label: 'Mis Proyectos',          icon: 'folder'   },
-  { id: 'presupuestos',  label: 'Historial Presupuestos', icon: 'budget'   },
+  { id: 'presupuestos',  label: 'Presupuestos',           icon: 'budget',  pro: true },
   { id: 'precios',       label: 'Base de Precios',        icon: 'price'    },
   { id: 'config',        label: 'Configuración',          icon: 'settings' },
 ];
@@ -30,8 +31,10 @@ const NAV_INSTALADOR = [
   { id: 'herramientas', label: 'Herramientas',     icon: 'wrench' },
 ];
 
-export default function Sidebar({ role, activeId, onNavigate }) {
+export default function Sidebar({ role, activeId, user, onNavigate }) {
   const navItems = role === 'instalador' ? NAV_INSTALADOR : NAV_PROFESIONAL;
+  const plan = getUserPlan(user);
+  const isPro = plan.id !== 'free';
   // resolve active: proyecto-detalle maps back to 'proyectos' highlight
   const effectiveActive = activeId === 'proyecto-detalle' ? 'proyectos' : (activeId || 'dashboard');
 
@@ -41,7 +44,7 @@ export default function Sidebar({ role, activeId, onNavigate }) {
       {navItems.map((item, i) => (
         <motion.div
           key={item.id}
-          className={`side-nav-item ${effectiveActive === item.id ? 'act' : ''}`}
+          className={`side-nav-item ${effectiveActive === item.id ? 'act' : ''} ${item.pro && !isPro ? 'side-nav-pro' : ''}`}
           onClick={() => onNavigate(item.id)}
           initial={{ opacity: 0, x: -6 }}
           animate={{ opacity: 1, x: 0 }}
@@ -53,8 +56,17 @@ export default function Sidebar({ role, activeId, onNavigate }) {
             <NavIcon type={item.icon} />
           </div>
           {item.label}
+          {item.pro && !isPro && <span className="side-pro-badge">PRO</span>}
         </motion.div>
       ))}
+
+      {/* Plan indicator */}
+      <div className="side-plan-indicator">
+        <div className="side-plan-label">{plan.label}</div>
+        {!isPro && (
+          <div className="side-plan-upgrade">Actualizar →</div>
+        )}
+      </div>
     </nav>
   );
 }

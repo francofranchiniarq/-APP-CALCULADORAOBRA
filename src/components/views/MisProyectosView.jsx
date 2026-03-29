@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { getObras, crearObra, editarObra, eliminarObra } from '../../modules/obras';
 import { fmtPeso } from '../../data/mockData';
+import { getUserPlan, canCreateProject } from '../../modules/plans';
 import ObraFormModal from '../ObraFormModal';
 import ConfirmModal from '../ConfirmModal';
 
@@ -41,17 +42,26 @@ const TrashIcon = () => (
   </svg>
 );
 
-export default function MisProyectosView({ onNavigate }) {
+export default function MisProyectosView({ onNavigate, user, onUpgrade }) {
   const [obras, setObras] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingObra, setEditingObra] = useState(null);
   const [deletingObra, setDeletingObra] = useState(null);
+  const plan = getUserPlan(user);
 
   const loadObras = useCallback(() => {
     setObras(getObras());
   }, []);
 
   useEffect(() => { loadObras(); }, [loadObras]);
+
+  const handleNewProject = () => {
+    if (!canCreateProject(user, obras.length)) {
+      onUpgrade('projects');
+      return;
+    }
+    setShowForm(true);
+  };
 
   const handleCreate = (formData) => {
     crearObra(formData);
@@ -94,6 +104,11 @@ export default function MisProyectosView({ onNavigate }) {
           ? 'Creá tu primer proyecto para empezar'
           : `${obras.length} proyecto${obras.length !== 1 ? 's' : ''} en total`
         }
+        {plan.maxProjects !== Infinity && (
+          <span className="dash-plan-badge" style={{ background: 'var(--bg)', color: 'var(--text3)', marginLeft: 8 }}>
+            {obras.length}/{plan.maxProjects} del plan {plan.label}
+          </span>
+        )}
       </div>
 
       <div className="projects-list">
@@ -137,7 +152,7 @@ export default function MisProyectosView({ onNavigate }) {
 
         <motion.div
           className="project-row project-row-new"
-          onClick={() => setShowForm(true)}
+          onClick={handleNewProject}
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.18, delay: obras.length * 0.04 }}

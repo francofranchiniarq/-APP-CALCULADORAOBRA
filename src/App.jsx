@@ -12,8 +12,10 @@ import AdminPanel from './components/AdminPanel';
 import MisProyectosView from './components/views/MisProyectosView';
 import DetalleProyectoView from './components/views/DetalleProyectoView';
 import ModuloAgua from './components/ModuloAgua';
+import UpgradeModal from './components/UpgradeModal';
 import { GanttChart } from './react-gantt/components/GanttChart';
 import { CALC_MODULES } from './modules/calculators';
+import { canAccessModule } from './modules/plans';
 import './styles/landing.css';
 
 const pageTransition = {
@@ -108,13 +110,38 @@ function AppShell({ user, onLogout }) {
     setView({ id: 'dashboard', project: null });
   };
 
+  // ── Plan upgrade modal state ──
+  const [upgradeModal, setUpgradeModal] = useState({ open: false, reason: null, moduleName: null });
+
+  const showUpgrade = (reason, moduleName = null) => {
+    setUpgradeModal({ open: true, reason, moduleName });
+  };
+
+  const handleSelectPlan = (planId) => {
+    // Guardar el plan elegido en el perfil del usuario
+    const saved = JSON.parse(localStorage.getItem('metriq_user') || '{}');
+    saved.plan = planId;
+    localStorage.setItem('metriq_user', JSON.stringify(saved));
+    // También actualizar en leads si existe
+    const leads = JSON.parse(localStorage.getItem('metriq_leads') || '[]');
+    const idx = leads.findIndex(l => l.email === saved.email);
+    if (idx !== -1) { leads[idx].plan = planId; localStorage.setItem('metriq_leads', JSON.stringify(leads)); }
+    setUpgradeModal({ open: false, reason: null, moduleName: null });
+    // Forzar reload para reflejar el cambio
+    window.location.reload();
+  };
+
   // Navegación interna: go('proyectos') / go('proyecto-detalle', { project })
   const go = (id, extra = {}) => {
     setView({ id, project: null, ...extra });
   };
 
-  // Abre un módulo de cálculo (con soporte especial para agua, gantt y presupuesto)
+  // Abre un módulo de cálculo — con enforcement de plan
   const openModule = (mod, project = null) => {
+    if (!canAccessModule(user, mod.id)) {
+      showUpgrade('module', mod.name);
+      return;
+    }
     if (mod.id === 'agua') {
       setView({ id: 'modulo-agua', project });
     } else if (mod.id === 'gantt') {
@@ -149,16 +176,18 @@ function AppShell({ user, onLogout }) {
             onNavigate={go}
             user={user}
             role={role}
+            onUpgrade={showUpgrade}
           />
         );
       case 'proyectos':
-        return <MisProyectosView onNavigate={go} />;
+        return <MisProyectosView onNavigate={go} user={user} onUpgrade={showUpgrade} />;
       case 'proyecto-detalle':
         return (
           <DetalleProyectoView
             project={view.project}
             onNavigate={go}
             onModuleOpen={openModule}
+            user={user}
           />
         );
       case 'modulo-agua':
@@ -186,7 +215,7 @@ function AppShell({ user, onLogout }) {
       case 'herramientas':
         return <PlaceholderView title="Herramientas" onNavigate={go} />;
       default:
-        return <Dashboard onOpen={openModule} onNavigate={go} user={user} role={role} />;
+        return <Dashboard onOpen={openModule} onNavigate={go} user={user} role={role} onUpgrade={showUpgrade} />;
     }
   };
 
@@ -200,7 +229,7 @@ function AppShell({ user, onLogout }) {
         onToggleRole={toggleRole}
       />
       <div className="layout">
-        <Sidebar activeId={sidebarActiveId} role={role} onNavigate={go} />
+        <Sidebar activeId={sidebarActiveId} role={role} user={user} onNavigate={go} />
         <main className="main">
           <AnimatePresence mode="wait">
             <Routes location={location}>
@@ -253,6 +282,14 @@ function AppShell({ user, onLogout }) {
           </AnimatePresence>
         </main>
       </div>
+
+      <UpgradeModal
+        open={upgradeModal.open}
+        reason={upgradeModal.reason}
+        moduleName={upgradeModal.moduleName}
+        onClose={() => setUpgradeModal({ open: false, reason: null, moduleName: null })}
+        onSelectPlan={handleSelectPlan}
+      />
     </div>
   );
 }

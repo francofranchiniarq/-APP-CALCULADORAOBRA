@@ -458,8 +458,10 @@ body {
 .mod-card-locked {
   background: var(--card); border-radius: var(--r); padding: 20px;
   box-shadow: var(--sh); position: relative; overflow: hidden;
-  opacity: 0.55; cursor: not-allowed; user-select: none;
+  opacity: 0.55; cursor: pointer; user-select: none;
+  transition: opacity 0.15s;
 }
+.mod-card-locked:hover { opacity: 0.7; }
 .lock-overlay {
   position: absolute; top: 12px; right: 12px;
   width: 26px; height: 26px; border-radius: 8px;
@@ -801,6 +803,124 @@ body {
 .proj-action-btn:hover { background: var(--bg); color: var(--text); border-color: var(--border); }
 .proj-action-btn.danger:hover { background: rgba(185,28,28,0.08); color: var(--red); border-color: var(--red); }
 
+/* ═══ Plan system — badges, indicators ═══ */
+.dash-plan-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 800; padding: 3px 10px;
+  border-radius: 20px; letter-spacing: 0.3px; margin-left: 8px;
+  vertical-align: middle;
+}
+.proj-card-new-limit {
+  font-size: 11px; font-weight: 700; color: var(--text3);
+  margin-top: 4px;
+}
+.mc-lock-badge {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 800; color: var(--amber);
+  letter-spacing: 0.3px;
+}
+
+/* ─── Sidebar plan indicator ─── */
+.side-nav-pro { opacity: 0.6; }
+.side-nav-pro:hover { opacity: 0.85; }
+.side-pro-badge {
+  font-size: 9px; font-weight: 900; padding: 2px 7px;
+  border-radius: 6px; background: var(--abg); color: var(--accent);
+  letter-spacing: 0.5px; margin-left: auto;
+}
+.side-plan-indicator {
+  margin-top: auto; padding: 16px 0 0; border-top: 1px solid var(--border2);
+  margin-top: 20px;
+}
+.side-plan-label {
+  font-size: 10px; font-weight: 800; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.side-plan-upgrade {
+  font-size: 11px; font-weight: 700; color: var(--accent);
+  margin-top: 4px; cursor: pointer;
+  transition: opacity 0.15s;
+}
+.side-plan-upgrade:hover { opacity: 0.7; }
+
+/* ═══ Upgrade Modal ═══ */
+.upgrade-panel {
+  background: var(--card); border-radius: var(--rp); box-shadow: var(--shl);
+  width: 100%; max-width: 780px; max-height: 90vh; overflow-y: auto;
+  position: relative;
+}
+.upgrade-header {
+  text-align: center; padding: 32px 24px 0; position: relative;
+}
+.upgrade-header .modal-close {
+  position: absolute; top: 16px; right: 16px;
+}
+.upgrade-lock-icon {
+  width: 48px; height: 48px; border-radius: 14px;
+  background: var(--abg); color: var(--accent);
+  display: inline-flex; align-items: center; justify-content: center;
+  margin-bottom: 12px;
+}
+.upgrade-title { font-size: 22px; font-weight: 900; color: var(--text); margin: 0 0 6px; }
+.upgrade-subtitle { font-size: 14px; color: var(--text2); font-weight: 500; margin: 0; max-width: 420px; margin: 0 auto; }
+
+.upgrade-plans {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+  padding: 28px 24px 0;
+}
+.upgrade-plan-card {
+  border: 1.5px solid var(--border2); border-radius: var(--r);
+  padding: 20px; position: relative;
+  display: flex; flex-direction: column;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.upgrade-plan-card.recommended {
+  border-color: var(--accent); box-shadow: 0 0 0 3px rgba(168,16,46,0.08);
+}
+.upgrade-recommended {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 800; color: var(--accent);
+  margin-bottom: 8px; letter-spacing: 0.3px;
+}
+.upgrade-plan-name { font-size: 18px; font-weight: 900; color: var(--text); }
+.upgrade-plan-tagline { font-size: 12px; color: var(--text2); font-weight: 500; margin-bottom: 14px; }
+.upgrade-plan-price { margin-bottom: 18px; }
+.upgrade-price-amount { font-size: 28px; font-weight: 900; color: var(--text); font-family: 'JetBrains Mono', monospace; letter-spacing: -1px; }
+.upgrade-price-detail { font-size: 13px; color: var(--text2); font-weight: 500; margin-left: 2px; }
+
+.upgrade-features {
+  list-style: none; padding: 0; margin: 0 0 20px; flex: 1;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.upgrade-features li {
+  font-size: 13px; color: var(--text); font-weight: 500;
+  display: flex; align-items: center; gap: 8px;
+}
+.upgrade-feature-check { flex-shrink: 0; display: flex; }
+
+.upgrade-plan-btn {
+  width: 100%; padding: 11px; border-radius: 12px;
+  font-size: 13px; font-weight: 700; font-family: 'Inter', sans-serif;
+  cursor: pointer; transition: all 0.15s; text-align: center;
+}
+.upgrade-plan-btn.primary {
+  background: var(--accent); color: #fff; border: none;
+}
+.upgrade-plan-btn.primary:hover { filter: brightness(0.88); }
+.upgrade-plan-btn.outline {
+  background: transparent; color: var(--text); border: 1.5px solid var(--border);
+}
+.upgrade-plan-btn.outline:hover { border-color: var(--accent); color: var(--accent); }
+.upgrade-plan-btn.current {
+  background: var(--bg); color: var(--text3); border: 1.5px solid var(--border2);
+  cursor: default;
+}
+
+.upgrade-footer {
+  text-align: center; font-size: 12px; color: var(--text3);
+  padding: 16px 24px 24px; margin: 0;
+}
+
 /* ═══ Admin Panel ═══ */
 .adm {
   min-height: 100vh; background: var(--bg); padding: 24px 32px 48px;
@@ -1022,4 +1142,6 @@ body {
   .adm-header { flex-direction: column; }
   .adm-header-actions { padding-top: 0; }
   .adm-detail-grid { grid-template-columns: 1fr 1fr; }
+  .upgrade-plans { grid-template-columns: 1fr; max-height: 60vh; overflow-y: auto; }
+  .upgrade-panel { max-width: 100%; }
 }
