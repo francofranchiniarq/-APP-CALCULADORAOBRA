@@ -16,6 +16,8 @@ import UpgradeModal from './components/UpgradeModal';
 import { GanttChart } from './react-gantt/components/GanttChart';
 import { CALC_MODULES } from './modules/calculators';
 import { canAccessModule } from './modules/plans';
+import { supabase } from './lib/supabase.js';
+import { fetchProfile, updateProfile, syncObrasDown } from './services/db.js';
 import './styles/landing.css';
 
 const pageTransition = {
@@ -41,6 +43,25 @@ function PlaceholderView({ title, onNavigate }) {
         ← Volver al dashboard
       </button>
     </motion.div>
+  );
+}
+
+// ── Loading screen mientras se verifica la sesión ────────────
+function LoadingScreen() {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#FAFAF9' }}>
+      <div style={{ textAlign: 'center' }}>
+        <svg width="48" height="48" viewBox="0 0 48 48">
+          <circle cx="24" cy="24" r="20" fill="none" stroke="rgba(63,63,63,0.12)" strokeWidth="3" />
+          <circle cx="24" cy="24" r="20" fill="none" stroke="#3F3F3F" strokeWidth="3"
+            strokeDasharray="80 126" strokeLinecap="round">
+            <animateTransform attributeName="transform" type="rotate"
+              values="0 24 24;360 24 24" dur="1s" repeatCount="indefinite" />
+          </circle>
+        </svg>
+        <p style={{ marginTop: 16, color: '#74777F', fontSize: 14 }}>Cargando Metriq...</p>
+      </div>
+    </div>
   );
 }
 
@@ -117,21 +138,23 @@ function AppShell({ user, onLogout, onUpdateUser }) {
     setUpgradeModal({ open: true, reason, moduleName });
   };
 
-  const handleSelectPlan = (planId) => {
-    // Guardar el plan elegido en el perfil del usuario
+  const handleSelectPlan = async (planId) => {
+    // Actualizar plan en Supabase
+    if (user?.id) {
+      await updateProfile(user.id, { plan: planId }).catch(() => {});
+    }
+    // También actualizar en localStorage legacy
     const saved = JSON.parse(localStorage.getItem('metriq_user') || '{}');
     saved.plan = planId;
     localStorage.setItem('metriq_user', JSON.stringify(saved));
-    // También actualizar en leads si existe
     const leads = JSON.parse(localStorage.getItem('metriq_leads') || '[]');
     const idx = leads.findIndex(l => l.email === saved.email);
     if (idx !== -1) { leads[idx].plan = planId; localStorage.setItem('metriq_leads', JSON.stringify(leads)); }
     setUpgradeModal({ open: false, reason: null, moduleName: null });
-    // Forzar reload para reflejar el cambio
     window.location.reload();
   };
 
-  // Navegación interna: go('proyectos') / go('proyecto-detalle', { project })
+  // Navegación interna
   const go = (id, extra = {}) => {
     setView({ id, project: null, ...extra });
   };
@@ -157,14 +180,12 @@ function AppShell({ user, onLogout, onUpdateUser }) {
   const sidebarActiveId = (() => {
     const path = location.pathname;
     if (path.includes('/calc/') || path.includes('/presupuesto')) return null;
-    // Vistas de módulo no mapean a ningún ítem del sidebar
     if (view.id === 'modulo-agua' || view.id === 'modulo-gantt') return null;
     return view.id;
   })();
 
   // Renderiza la vista central según el estado
   const renderMain = () => {
-    // Si estamos en una ruta de URL (calc/presup), el router la maneja
     const path = location.pathname;
     if (path.includes('/calc/') || path.includes('/presupuesto')) return null;
 
@@ -299,50 +320,89 @@ export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // ── Persistencia de sesión ──────────────────────────────────
-  const [user, setUser] = useState(() => {
-    try {
-      const saved = localStorage.getItem('metriq_user');
-      return saved ? JSON.parse(saved) : null;
-    } catch { return null; }
-  });
+  // ── Sesión Supabase ────────────────────────────────────────
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
-  // Usuario que vuelve: saltar landing → ir directo al dashboard
+  useEffect(() => {
+    // 1. Verificar sesión existente al montar
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        const profile = await fetchProfile(session.user);
+        setUser(profile);
+        // Sincronizar obras de Supabase → localStorage
+        syncObrasDown().catch(() => {});
+        // También guardar en localStorage legacy para componentes que lo lean
+        localStorage.setItem('metriq_user', JSON.stringify(profile));
+      }
+      setAuthLoading(false);
+    });
+
+    // 2. Escuchar cambios de auth (login, logout, token refresh)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+          const profile = await fetchProfile(session.user);
+          setUser(profile);
+          localStorage.setItem('metriq_user', JSON.stringify(profile));
+          syncObrasDown().catch(() => {});
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null);
+          localStorage.removeItem('metriq_user');
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Redirect: usuario logueado en "/" → dashboard
   useEffect(() => {
     if (location.pathname === '/' && user) {
       navigate('/dashboard', { replace: true });
     }
-  }, []);
+  }, [user]);
 
-  // Modo de login: 'onboarding' (cuestionario) o 'login' (directo)
+  // Modo de login
   const [loginMode, setLoginMode] = useState('onboarding');
 
   const handleStartOnboarding = () => { setLoginMode('onboarding'); navigate('/login'); };
   const handleStartLogin = () => { setLoginMode('login'); navigate('/login'); };
 
-  const handleLoginComplete = (userData) => {
-    const profile = {
-      ...userData,
-      name: userData.name || userData.email?.split('@')[0] || '',
-      plan: userData.plan || 'free',
-      loginAt: Date.now(),
-    };
-    try { localStorage.setItem('metriq_user', JSON.stringify(profile)); } catch {}
-    setUser(profile);
+  const handleLoginComplete = async () => {
+    // Al llegar acá, Supabase auth ya completó. Fetchar perfil fresco.
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    if (authUser) {
+      const profile = await fetchProfile(authUser);
+      setUser(profile);
+      localStorage.setItem('metriq_user', JSON.stringify(profile));
+      // Descargar obras del usuario
+      syncObrasDown().catch(() => {});
+    }
     navigate('/dashboard');
   };
 
-  const handleLogout = () => {
-    try { localStorage.removeItem('metriq_user'); } catch {}
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    localStorage.removeItem('metriq_user');
+    localStorage.removeItem('metriq_obras');
+    localStorage.removeItem('metriq_obra_activa');
     setUser(null);
     navigate('/');
   };
 
-  const handleUpdateUser = (updates) => {
+  const handleUpdateUser = async (updates) => {
     const updated = { ...user, ...updates };
-    try { localStorage.setItem('metriq_user', JSON.stringify(updated)); } catch {}
     setUser(updated);
+    localStorage.setItem('metriq_user', JSON.stringify(updated));
+    // Sync profile update to Supabase
+    if (user?.id) {
+      updateProfile(user.id, updates).catch(() => {});
+    }
   };
+
+  // ── Loading mientras se verifica sesión ─────────────────────
+  if (authLoading) return <LoadingScreen />;
 
   const isLanding = location.pathname === '/';
   const isLogin   = location.pathname === '/login';

@@ -1,13 +1,16 @@
 /* ═══════════════════════════════════════════════════════════════
-   Metriq — Sistema de Obras (persistencia localStorage)
+   Metriq — Sistema de Obras (localStorage + sync Supabase)
 
    Estructura:
    - Obra: { id, nombre, direccion, cliente, creada, actualizada, calculos: [] }
    - Calculo: { id, moduloId, moduloName, fecha, valores, resultado }
 
    Cada obra agrupa cálculos de distintos módulos.
-   Un usuario puede tener múltiples obras activas.
+   Los datos se guardan en localStorage (instantáneo) y se
+   sincronizan a Supabase en background (persistente).
    ═══════════════════════════════════════════════════════════════ */
+
+import { syncObraUp, deleteObraUp, deleteCalculoUp } from '../services/db.js';
 
 const STORAGE_KEY = "metriq_obras";
 
@@ -58,6 +61,8 @@ export function crearObra({ nombre, direccion = "", cliente = "", tipo = "Vivien
   };
   obras.push(nueva);
   save(obras);
+  // Sync a Supabase en background
+  syncObraUp(nueva).catch(() => {});
   return nueva;
 }
 
@@ -67,12 +72,16 @@ export function editarObra(obraId, datos) {
   if (idx === -1) return null;
   obras[idx] = { ...obras[idx], ...datos, actualizada: new Date().toISOString() };
   save(obras);
+  // Sync a Supabase en background
+  syncObraUp(obras[idx]).catch(() => {});
   return obras[idx];
 }
 
 export function eliminarObra(obraId) {
   const obras = load().filter(o => o.id !== obraId);
   save(obras);
+  // Sync a Supabase en background
+  deleteObraUp(obraId).catch(() => {});
 }
 
 // ─── Cálculos dentro de una Obra ───
@@ -94,6 +103,8 @@ export function guardarCalculo(obraId, { moduloId, moduloName, valores, resultad
   obra.calculos.push(calculo);
   obra.actualizada = new Date().toISOString();
   save(obras);
+  // Sync la obra completa (incluye el nuevo cálculo)
+  syncObraUp(obra).catch(() => {});
   return calculo;
 }
 
@@ -111,6 +122,8 @@ export function eliminarCalculo(obraId, calculoId) {
   obra.calculos = obra.calculos.filter(c => c.id !== calculoId);
   obra.actualizada = new Date().toISOString();
   save(obras);
+  // Sync a Supabase en background
+  deleteCalculoUp(calculoId).catch(() => {});
 }
 
 // ─── Obra activa (última seleccionada) ───
