@@ -12,6 +12,7 @@ import AdminPanel from './components/AdminPanel';
 import MisProyectosView from './components/views/MisProyectosView';
 import DetalleProyectoView from './components/views/DetalleProyectoView';
 import ModuloAgua from './components/ModuloAgua';
+import ModuloPlanos from './components/ModuloPlanos';
 import UpgradeModal from './components/UpgradeModal';
 import { GanttChart } from './react-gantt/components/GanttChart';
 import { CALC_MODULES } from './modules/calculators';
@@ -193,6 +194,13 @@ function AppShell({ user, onLogout, onUpdateUser }) {
       case 'modulo-agua':
         return (
           <ModuloAgua
+            project={view.project}
+            onBack={() => view.project ? go('proyecto-detalle', { project: view.project }) : go('dashboard')}
+          />
+        );
+      case 'planos':
+        return (
+          <ModuloPlanos
             project={view.project}
             onBack={() => view.project ? go('proyecto-detalle', { project: view.project }) : go('dashboard')}
           />
