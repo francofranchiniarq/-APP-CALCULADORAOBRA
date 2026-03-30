@@ -11,6 +11,7 @@ import OnboardingLogin from './components/OnboardingLogin';
 import LeadsPanel from './components/LeadsPanel';
 import MisProyectosView from './components/views/MisProyectosView';
 import DetalleProyectoView from './components/views/DetalleProyectoView';
+import ProyectoLayout from './components/views/ProyectoLayout';
 import ModuloAgua from './components/ModuloAgua';
 import { GanttChart } from './react-gantt/components/GanttChart';
 import { CALC_MODULES } from './modules/calculators';
@@ -155,7 +156,7 @@ function AppShell({ user, onLogout }) {
         return <MisProyectosView onNavigate={go} />;
       case 'proyecto-detalle':
         return (
-          <DetalleProyectoView
+          <ProyectoLayout
             project={view.project}
             onNavigate={go}
             onModuleOpen={openModule}
