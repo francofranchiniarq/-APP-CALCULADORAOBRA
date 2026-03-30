@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { getObras, crearObra, editarObra, eliminarObra } from '../../modules/obras';
 import { fmtPeso } from '../../data/mockData';
@@ -42,7 +43,8 @@ const TrashIcon = () => (
   </svg>
 );
 
-export default function MisProyectosView({ onNavigate, user, onUpgrade }) {
+export default function MisProyectosView({ user, onUpgrade }) {
+  const navigate = useNavigate();
   const [obras, setObras] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingObra, setEditingObra] = useState(null);
@@ -118,7 +120,7 @@ export default function MisProyectosView({ onNavigate, user, onUpgrade }) {
             <motion.div
               key={obra.id}
               className="project-row"
-              onClick={() => onNavigate('proyecto-detalle', { project: obra })}
+              onClick={() => navigate(`/dashboard/proyectos/${obra.id}`)}
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.18, delay: i * 0.04 }}

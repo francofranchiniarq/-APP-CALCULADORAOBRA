@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route, useNavigate, useParams, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
@@ -11,6 +11,9 @@ import OnboardingLogin from './components/OnboardingLogin';
 import AdminPanel from './components/AdminPanel';
 import MisProyectosView from './components/views/MisProyectosView';
 import DetalleProyectoView from './components/views/DetalleProyectoView';
+import BaseDePreciosView from './components/views/BaseDePreciosView';
+import ConfiguracionView from './components/views/ConfiguracionView';
+import PresupuestosView from './components/views/PresupuestosView';
 import ModuloAgua from './components/ModuloAgua';
 import UpgradeModal from './components/UpgradeModal';
 import { GanttChart } from './react-gantt/components/GanttChart';
@@ -27,8 +30,25 @@ const pageTransition = {
   transition: { duration: 0.28, ease: 'easeOut' },
 };
 
+// ── Wrapper de animación reutilizable para cada ruta ─────────
+function PageWrapper({ children, motionKey }) {
+  return (
+    <motion.div
+      key={motionKey}
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -4 }}
+      transition={{ duration: 0.22, ease: 'easeOut' }}
+      style={{ height: '100%' }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 // ── Placeholder para vistas aún no construidas ───────────────
-function PlaceholderView({ title, onNavigate }) {
+function PlaceholderView({ title }) {
+  const navigate = useNavigate();
   return (
     <motion.div
       className="placeholder-view"
@@ -39,7 +59,7 @@ function PlaceholderView({ title, onNavigate }) {
       <div className="placeholder-icon">🚧</div>
       <div className="placeholder-title">{title}</div>
       <div className="placeholder-sub">Esta sección está en construcción.</div>
-      <button className="calc-back" style={{ marginTop: 16 }} onClick={() => onNavigate('dashboard')}>
+      <button className="calc-back" style={{ marginTop: 16 }} onClick={() => navigate('/dashboard')}>
         ← Volver al dashboard
       </button>
     </motion.div>
@@ -65,7 +85,7 @@ function LoadingScreen() {
   );
 }
 
-// ── Wrapper para CalcPage desde URL directa ──────────────────
+// ── CalcPage — ruta /dashboard/calc/:moduleId ────────────────
 function CalcPage() {
   const { moduleId } = useParams();
   const navigate = useNavigate();
@@ -86,8 +106,7 @@ function CalcPage() {
   });
 
   if (!mod) {
-    navigate('/dashboard', { replace: true });
-    return null;
+    return <Navigate to="/dashboard" replace />;
   }
 
   const updVal = (k, val) => {
@@ -111,27 +130,48 @@ function CalcPageWrapper() {
   return <CalcPage key={moduleId} />;
 }
 
+// ── BudgetPage — ruta /dashboard/presupuesto ─────────────────
 function BudgetPage() {
   const navigate = useNavigate();
   return <BudgetView onBack={() => navigate('/dashboard')} />;
 }
 
-// ── AppShell — núcleo de la app con estado de navegación ─────
-function AppShell({ user, onLogout, onUpdateUser }) {
+// ── ModuloAguaPage — ruta /dashboard/modulo/agua ─────────────
+function ModuloAguaPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const project = location.state?.project || null;
+  const backPath = project ? `/dashboard/proyectos/${project.id}` : '/dashboard';
+  return <ModuloAgua project={project} onBack={() => navigate(backPath)} />;
+}
 
-  // Estado de vista interna (reemplaza routing complejo para vistas del dashboard)
-  const [view, setView] = useState({ id: 'dashboard', project: null });
+// ── GanttPage — ruta /dashboard/modulo/gantt ─────────────────
+function GanttPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const project = location.state?.project || null;
+  const backPath = project ? `/dashboard/proyectos/${project.id}` : '/dashboard';
+  return (
+    <GanttChart
+      obraName={project?.nombre || project?.name || 'Cronograma de Obra'}
+      onBack={() => navigate(backPath)}
+    />
+  );
+}
+
+// ── AppShell — layout persistente con sidebar + contenido ────
+function AppShell({ user, onLogout, onUpdateUser }) {
+  const navigate  = useNavigate();
+  const location  = useLocation();
 
   // Role state — por defecto usa el rol del onboarding
   const [role, setRole] = useState(user?.role || 'profesional');
   const toggleRole = () => {
     setRole(r => r === 'profesional' ? 'instalador' : 'profesional');
-    setView({ id: 'dashboard', project: null });
+    navigate('/dashboard');
   };
 
-  // ── Plan upgrade modal state ──
+  // ── Plan upgrade modal ──
   const [upgradeModal, setUpgradeModal] = useState({ open: false, reason: null, moduleName: null });
 
   const showUpgrade = (reason, moduleName = null) => {
@@ -139,11 +179,9 @@ function AppShell({ user, onLogout, onUpdateUser }) {
   };
 
   const handleSelectPlan = async (planId) => {
-    // Actualizar plan en Supabase
     if (user?.id) {
       await updateProfile(user.id, { plan: planId }).catch(() => {});
     }
-    // También actualizar en localStorage legacy
     const saved = JSON.parse(localStorage.getItem('metriq_user') || '{}');
     saved.plan = planId;
     localStorage.setItem('metriq_user', JSON.stringify(saved));
@@ -154,21 +192,16 @@ function AppShell({ user, onLogout, onUpdateUser }) {
     window.location.reload();
   };
 
-  // Navegación interna
-  const go = (id, extra = {}) => {
-    setView({ id, project: null, ...extra });
-  };
-
-  // Abre un módulo de cálculo — con enforcement de plan
+  // ── Abre un módulo de cálculo con enforcement de plan ───────
   const openModule = (mod, project = null) => {
     if (!canAccessModule(user, mod.id)) {
       showUpgrade('module', mod.name);
       return;
     }
     if (mod.id === 'agua') {
-      setView({ id: 'modulo-agua', project });
+      navigate('/dashboard/modulo/agua', { state: { project } });
     } else if (mod.id === 'gantt') {
-      setView({ id: 'modulo-gantt', project });
+      navigate('/dashboard/modulo/gantt', { state: { project } });
     } else if (mod.id === 'presup') {
       navigate('/dashboard/presupuesto');
     } else {
@@ -176,130 +209,155 @@ function AppShell({ user, onLogout, onUpdateUser }) {
     }
   };
 
-  // Determina qué item del sidebar está activo
-  const sidebarActiveId = (() => {
-    const path = location.pathname;
-    if (path.includes('/calc/') || path.includes('/presupuesto')) return null;
-    if (view.id === 'modulo-agua' || view.id === 'modulo-gantt') return null;
-    return view.id;
-  })();
-
-  // Renderiza la vista central según el estado
-  const renderMain = () => {
-    const path = location.pathname;
-    if (path.includes('/calc/') || path.includes('/presupuesto')) return null;
-
-    switch (view.id) {
-      case 'dashboard':
-        return (
-          <Dashboard
-            onOpen={openModule}
-            onNavigate={go}
-            user={user}
-            role={role}
-            onUpgrade={showUpgrade}
-          />
-        );
-      case 'proyectos':
-        return <MisProyectosView onNavigate={go} user={user} onUpgrade={showUpgrade} />;
-      case 'proyecto-detalle':
-        return (
-          <DetalleProyectoView
-            project={view.project}
-            onNavigate={go}
-            onModuleOpen={openModule}
-            user={user}
-          />
-        );
-      case 'modulo-agua':
-        return (
-          <ModuloAgua
-            project={view.project}
-            onBack={() => view.project ? go('proyecto-detalle', { project: view.project }) : go('dashboard')}
-          />
-        );
-      case 'modulo-gantt':
-        return (
-          <GanttChart
-            obraName={view.project?.name || 'Cronograma de Obra'}
-            onBack={() => view.project ? go('proyecto-detalle', { project: view.project }) : go('dashboard')}
-          />
-        );
-      case 'presupuestos':
-        return <PlaceholderView title="Historial de Presupuestos" onNavigate={go} />;
-      case 'precios':
-        return <PlaceholderView title="Base de Precios" onNavigate={go} />;
-      case 'config':
-        return <PlaceholderView title="Configuración" onNavigate={go} />;
-      case 'cotizaciones':
-        return <PlaceholderView title="Mis Cotizaciones" onNavigate={go} />;
-      case 'herramientas':
-        return <PlaceholderView title="Herramientas" onNavigate={go} />;
-      default:
-        return <Dashboard onOpen={openModule} onNavigate={go} user={user} role={role} onUpgrade={showUpgrade} />;
-    }
-  };
-
   return (
     <div className="app">
       <Header
-        onLogoClick={() => go('dashboard')}
+        onLogoClick={() => navigate('/dashboard')}
         user={user}
         onLogout={onLogout}
         onUpdateUser={onUpdateUser}
         role={role}
         onToggleRole={toggleRole}
       />
+
       <div className="layout">
-        <Sidebar activeId={sidebarActiveId} role={role} user={user} onNavigate={go} />
+        {/* Sidebar persistente — nunca se recarga al navegar */}
+        <Sidebar role={role} user={user} />
+
+        {/* Área de contenido dinámica — AnimatePresence da transición suave */}
         <main className="main">
           <AnimatePresence mode="wait">
-            <Routes location={location}>
+            <Routes location={location} key={location.pathname}>
+
+              {/* ── Dashboard (index) ──────────────────────────── */}
               <Route
-                path="/"
+                index
                 element={
-                  <motion.div
-                    key={view.id + (view.project?.id || '')}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -4 }}
-                    transition={{ duration: 0.22, ease: 'easeOut' }}
-                    style={{ height: '100%' }}
-                  >
-                    {renderMain()}
-                  </motion.div>
+                  <PageWrapper motionKey="dashboard">
+                    <Dashboard
+                      onOpen={openModule}
+                      onNavigate={(id) => navigate(`/dashboard/${id === 'dashboard' ? '' : id}`)}
+                      user={user}
+                      role={role}
+                      onUpgrade={showUpgrade}
+                    />
+                  </PageWrapper>
                 }
               />
+
+              {/* ── Mis Proyectos ─────────────────────────────── */}
+              <Route
+                path="/proyectos"
+                element={
+                  <PageWrapper motionKey="proyectos">
+                    <MisProyectosView user={user} onUpgrade={showUpgrade} />
+                  </PageWrapper>
+                }
+              />
+
+              {/* ── Detalle de Proyecto ───────────────────────── */}
+              <Route
+                path="/proyectos/:id"
+                element={
+                  <PageWrapper motionKey={location.pathname}>
+                    <DetalleProyectoView onModuleOpen={openModule} user={user} />
+                  </PageWrapper>
+                }
+              />
+
+              {/* ── Presupuestos ──────────────────────────────── */}
+              <Route
+                path="/presupuestos"
+                element={
+                  <PageWrapper motionKey="presupuestos">
+                    <PresupuestosView />
+                  </PageWrapper>
+                }
+              />
+
+              {/* ── Base de Precios ───────────────────────────── */}
+              <Route
+                path="/precios"
+                element={
+                  <PageWrapper motionKey="precios">
+                    <BaseDePreciosView />
+                  </PageWrapper>
+                }
+              />
+
+              {/* ── Configuración ─────────────────────────────── */}
+              <Route
+                path="/configuracion"
+                element={
+                  <PageWrapper motionKey="configuracion">
+                    <ConfiguracionView />
+                  </PageWrapper>
+                }
+              />
+
+              {/* ── Cotizaciones (instalador) ─────────────────── */}
+              <Route
+                path="/cotizaciones"
+                element={
+                  <PageWrapper motionKey="cotizaciones">
+                    <PlaceholderView title="Mis Cotizaciones" />
+                  </PageWrapper>
+                }
+              />
+
+              {/* ── Herramientas (instalador) ─────────────────── */}
+              <Route
+                path="/herramientas"
+                element={
+                  <PageWrapper motionKey="herramientas">
+                    <PlaceholderView title="Herramientas" />
+                  </PageWrapper>
+                }
+              />
+
+              {/* ── Calculadoras ──────────────────────────────── */}
               <Route
                 path="/calc/:moduleId"
                 element={
-                  <motion.div
-                    key={location.pathname}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -4 }}
-                    transition={{ duration: 0.22, ease: 'easeOut' }}
-                    style={{ height: '100%' }}
-                  >
+                  <PageWrapper motionKey={location.pathname}>
                     <CalcPageWrapper />
-                  </motion.div>
+                  </PageWrapper>
                 }
               />
+
+              {/* ── Presupuesto (BudgetView) ──────────────────── */}
               <Route
                 path="/presupuesto"
                 element={
-                  <motion.div
-                    key="presupuesto"
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -4 }}
-                    transition={{ duration: 0.22, ease: 'easeOut' }}
-                    style={{ height: '100%' }}
-                  >
+                  <PageWrapper motionKey="presupuesto">
                     <BudgetPage />
-                  </motion.div>
+                  </PageWrapper>
                 }
               />
+
+              {/* ── Módulo Agua ───────────────────────────────── */}
+              <Route
+                path="/modulo/agua"
+                element={
+                  <PageWrapper motionKey="modulo-agua">
+                    <ModuloAguaPage />
+                  </PageWrapper>
+                }
+              />
+
+              {/* ── Módulo Gantt ──────────────────────────────── */}
+              <Route
+                path="/modulo/gantt"
+                element={
+                  <PageWrapper motionKey="modulo-gantt">
+                    <GanttPage />
+                  </PageWrapper>
+                }
+              />
+
+              {/* ── Fallback ──────────────────────────────────── */}
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+
             </Routes>
           </AnimatePresence>
         </main>
@@ -316,29 +374,25 @@ function AppShell({ user, onLogout, onUpdateUser }) {
   );
 }
 
+// ── App root — autenticación y routing de alto nivel ─────────
 export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // ── Sesión Supabase ────────────────────────────────────────
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Verificar sesión existente al montar (también procesa OAuth redirect)
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         const profile = await fetchProfile(session.user);
         setUser(profile);
-        // Sincronizar obras de Supabase → localStorage
         syncObrasDown().catch(() => {});
-        // También guardar en localStorage legacy para componentes que lo lean
         localStorage.setItem('metriq_user', JSON.stringify(profile));
       }
       setAuthLoading(false);
     });
 
-    // 2. Escuchar cambios de auth (login, logout, token refresh, OAuth redirect)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === 'SIGNED_IN' && session?.user) {
@@ -346,7 +400,6 @@ export default function App() {
           setUser(profile);
           localStorage.setItem('metriq_user', JSON.stringify(profile));
           syncObrasDown().catch(() => {});
-          // Clean up OAuth redirect params from URL
           if (window.location.hash.includes('access_token')) {
             window.history.replaceState({}, document.title, window.location.pathname);
           }
@@ -360,27 +413,24 @@ export default function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Redirect: usuario logueado en "/" → dashboard
+  // Redirect: usuario logueado en "/" → /dashboard
   useEffect(() => {
     if (location.pathname === '/' && user) {
       navigate('/dashboard', { replace: true });
     }
   }, [user]);
 
-  // Modo de login
   const [loginMode, setLoginMode] = useState('onboarding');
 
   const handleStartOnboarding = () => { setLoginMode('onboarding'); navigate('/login'); };
-  const handleStartLogin = () => { setLoginMode('login'); navigate('/login'); };
+  const handleStartLogin       = () => { setLoginMode('login');      navigate('/login'); };
 
   const handleLoginComplete = async () => {
-    // Al llegar acá, Supabase auth ya completó. Fetchar perfil fresco.
     const { data: { user: authUser } } = await supabase.auth.getUser();
     if (authUser) {
       const profile = await fetchProfile(authUser);
       setUser(profile);
       localStorage.setItem('metriq_user', JSON.stringify(profile));
-      // Descargar obras del usuario
       syncObrasDown().catch(() => {});
     }
     navigate('/dashboard');
@@ -399,13 +449,11 @@ export default function App() {
     const updated = { ...user, ...updates };
     setUser(updated);
     localStorage.setItem('metriq_user', JSON.stringify(updated));
-    // Sync profile update to Supabase
     if (user?.id) {
       updateProfile(user.id, updates).catch(() => {});
     }
   };
 
-  // ── Loading mientras se verifica sesión ─────────────────────
   if (authLoading) return <LoadingScreen />;
 
   const isLanding = location.pathname === '/';
@@ -429,7 +477,16 @@ export default function App() {
       ) : (
         <motion.div key="dashboard" {...pageTransition}>
           <Routes location={location}>
-            <Route path="/dashboard/*" element={<AppShell user={user} onLogout={handleLogout} onUpdateUser={handleUpdateUser} />} />
+            <Route
+              path="/dashboard/*"
+              element={
+                <AppShell
+                  user={user}
+                  onLogout={handleLogout}
+                  onUpdateUser={handleUpdateUser}
+                />
+              }
+            />
           </Routes>
         </motion.div>
       )}

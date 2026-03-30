@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { useParams, useNavigate, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { editarObra, eliminarObra } from '../../modules/obras';
+import { getObras, editarObra, eliminarObra } from '../../modules/obras';
 import { fmtPeso } from '../../data/mockData';
 import ObraFormModal from '../ObraFormModal';
 import ConfirmModal from '../ConfirmModal';
@@ -298,8 +299,10 @@ function SectionPlaceholder({ label }) {
 }
 
 // ── Componente principal ───────────────────────────────────────
-export default function DetalleProyectoView({ project, onNavigate, onModuleOpen, user }) {
-  const [obra, setObra]       = useState(project);
+export default function DetalleProyectoView({ onModuleOpen, user }) {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [obra, setObra] = useState(() => getObras().find(o => o.id === id) || null);
   const [showEdit, setShowEdit]     = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [activeSection, setActiveSection] = useState('lobby');
@@ -308,8 +311,7 @@ export default function DetalleProyectoView({ project, onNavigate, onModuleOpen,
   ]);
 
   if (!obra) {
-    onNavigate('proyectos');
-    return null;
+    return <Navigate to="/dashboard/proyectos" replace />;
   }
 
   const nombre    = obra.nombre   || obra.name    || 'Proyecto';
@@ -346,7 +348,7 @@ export default function DetalleProyectoView({ project, onNavigate, onModuleOpen,
   const handleDelete = () => {
     eliminarObra(obra.id);
     setShowDelete(false);
-    onNavigate('proyectos');
+    navigate('/dashboard/proyectos');
   };
 
   const renderContent = () => {
@@ -367,7 +369,7 @@ export default function DetalleProyectoView({ project, onNavigate, onModuleOpen,
       transition={{ duration: 0.22 }}
     >
       {/* ── Back ─────────────────────────────────────────────── */}
-      <button className="calc-back" style={{ marginBottom: 10 }} onClick={() => onNavigate('proyectos')}>
+      <button className="calc-back" style={{ marginBottom: 10 }} onClick={() => navigate('/dashboard/proyectos')}>
         ← Volver a proyectos
       </button>
 

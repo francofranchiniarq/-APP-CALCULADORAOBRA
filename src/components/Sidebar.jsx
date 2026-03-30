@@ -1,3 +1,4 @@
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { getUserPlan } from '../modules/plans';
 
@@ -18,34 +19,43 @@ const NavIcon = ({ type }) => {
 
 // ─── Configuración de navegación por rol ─────────────────────
 const NAV_PROFESIONAL = [
-  { id: 'dashboard',     label: 'Dashboard',              icon: 'home'     },
-  { id: 'proyectos',     label: 'Mis Proyectos',          icon: 'folder'   },
-  { id: 'presupuestos',  label: 'Presupuestos',           icon: 'budget',  pro: true },
-  { id: 'precios',       label: 'Base de Precios',        icon: 'price'    },
-  { id: 'config',        label: 'Configuración',          icon: 'settings' },
+  { id: 'dashboard',    label: 'Dashboard',        icon: 'home',     path: '/dashboard',              exact: true  },
+  { id: 'proyectos',    label: 'Mis Proyectos',    icon: 'folder',   path: '/dashboard/proyectos'                 },
+  { id: 'presupuestos', label: 'Presupuestos',     icon: 'budget',   path: '/dashboard/presupuestos', pro: true    },
+  { id: 'precios',      label: 'Base de Precios',  icon: 'price',    path: '/dashboard/precios'                   },
+  { id: 'config',       label: 'Configuración',    icon: 'settings', path: '/dashboard/configuracion'             },
 ];
 
 const NAV_INSTALADOR = [
-  { id: 'dashboard',    label: 'Dashboard',       icon: 'home'   },
-  { id: 'cotizaciones', label: 'Mis Cotizaciones', icon: 'quote'  },
-  { id: 'herramientas', label: 'Herramientas',     icon: 'wrench' },
+  { id: 'dashboard',    label: 'Dashboard',        icon: 'home',   path: '/dashboard',             exact: true },
+  { id: 'cotizaciones', label: 'Mis Cotizaciones', icon: 'quote',  path: '/dashboard/cotizaciones'             },
+  { id: 'herramientas', label: 'Herramientas',     icon: 'wrench', path: '/dashboard/herramientas'             },
 ];
 
-export default function Sidebar({ role, activeId, user, onNavigate }) {
+export default function Sidebar({ role, user }) {
+  const navigate  = useNavigate();
+  const { pathname } = useLocation();
+
   const navItems = role === 'instalador' ? NAV_INSTALADOR : NAV_PROFESIONAL;
-  const plan = getUserPlan(user);
+  const plan  = getUserPlan(user);
   const isPro = plan.id !== 'free';
-  // resolve active: proyecto-detalle maps back to 'proyectos' highlight
-  const effectiveActive = activeId === 'proyecto-detalle' ? 'proyectos' : (activeId || 'dashboard');
+
+  // Active detection: exact match for dashboard, prefix match for the rest.
+  // Also highlights "proyectos" when viewing a project detail (/dashboard/proyectos/:id).
+  const isActive = (item) =>
+    item.exact
+      ? pathname === item.path || pathname === item.path + '/'
+      : pathname.startsWith(item.path);
 
   return (
     <nav className="side">
       <div className="side-label">Menú</div>
+
       {navItems.map((item, i) => (
         <motion.div
           key={item.id}
-          className={`side-nav-item ${effectiveActive === item.id ? 'act' : ''} ${item.pro && !isPro ? 'side-nav-pro' : ''}`}
-          onClick={() => onNavigate(item.id)}
+          className={`side-nav-item${isActive(item) ? ' act' : ''}${item.pro && !isPro ? ' side-nav-pro' : ''}`}
+          onClick={() => navigate(item.path)}
           initial={{ opacity: 0, x: -6 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.18, delay: i * 0.04 }}
