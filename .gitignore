@@ -3,3 +3,5 @@ dist
 .env
 .env.*
 *.local
+# Datos locales de backup (específicos de cada entorno, no subir al repo)
+.data/
