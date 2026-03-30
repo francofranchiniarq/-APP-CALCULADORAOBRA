@@ -5,6 +5,7 @@ import { fmtPeso } from '../../data/mockData';
 import ObraFormModal from '../ObraFormModal';
 import ConfirmModal from '../ConfirmModal';
 import Ring from '../Ring';
+import ModuloPlanos from '../ModuloPlanos';
 
 // ── Icons ──────────────────────────────────────────────────────
 const IconDoc = () => (
@@ -350,6 +351,7 @@ export default function DetalleProyectoView({ project, onNavigate, onModuleOpen,
 
   const renderContent = () => {
     if (activeSection === 'lobby') return <ProjectLobby obra={obra} />;
+    if (activeSection === 'planos') return <ModuloPlanos project={obra} />;
     const label =
       NAV_CATEGORIES.flatMap((c) => c.items).find((i) => i.id === activeSection)?.label ||
       activeSection;
