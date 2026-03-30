@@ -325,7 +325,7 @@ export default function App() {
   const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Verificar sesión existente al montar
+    // 1. Verificar sesión existente al montar (también procesa OAuth redirect)
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         const profile = await fetchProfile(session.user);
@@ -338,7 +338,7 @@ export default function App() {
       setAuthLoading(false);
     });
 
-    // 2. Escuchar cambios de auth (login, logout, token refresh)
+    // 2. Escuchar cambios de auth (login, logout, token refresh, OAuth redirect)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === 'SIGNED_IN' && session?.user) {
@@ -346,6 +346,10 @@ export default function App() {
           setUser(profile);
           localStorage.setItem('metriq_user', JSON.stringify(profile));
           syncObrasDown().catch(() => {});
+          // Clean up OAuth redirect params from URL
+          if (window.location.hash.includes('access_token')) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
           localStorage.removeItem('metriq_user');
