@@ -5,21 +5,25 @@
 export const MOCK_PROJECTS = [
   {
     id: 1, name: "Edificio Rosario Centro", type: "Edificio Residencial",
+    address: "Av. Córdoba 1234, Rosario, Santa Fe",
     status: "activo", budget: 185000000, progress: 65, lastUpdate: "hace 2 días",
     modules: ['estruct', 'agua', 'cloacal', 'gas', 'electrico', 'presup', 'gantt'],
   },
   {
     id: 2, name: "Casa Ibarlucea", type: "Vivienda Unifamiliar",
+    address: "Los Ombúes 540, Ibarlucea, Santa Fe",
     status: "activo", budget: 42000000, progress: 30, lastUpdate: "hace 1 semana",
     modules: ['agua', 'cloacal', 'electrico', 'presup'],
   },
   {
     id: 3, name: "Local Comercial Pellegrini", type: "Comercial",
+    address: "Bv. Oroño 780, Rosario, Santa Fe",
     status: "presupuesto", budget: 28000000, progress: 0, lastUpdate: "hace 3 días",
     modules: ['electrico', 'termo', 'presup'],
   },
   {
     id: 4, name: "Refacción PH Pichincha", type: "Reforma",
+    address: "Pichincha 2100, Rosario, Santa Fe",
     status: "finalizado", budget: 15000000, progress: 100, lastUpdate: "hace 2 semanas",
     modules: ['seco', 'agua', 'presup'],
   },
