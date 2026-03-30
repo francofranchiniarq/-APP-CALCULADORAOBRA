@@ -1424,208 +1424,198 @@ body {
 
 .planos-root { display: flex; flex-direction: column; gap: 16px; padding-bottom: 40px; }
 
-/* Header */
-.planos-header-left {
-  display: flex; align-items: center; gap: 16px; flex: 1; min-width: 0;
-}
+/* ── Header ── */
+.planos-header-left { display: flex; align-items: center; gap: 16px; flex: 1; min-width: 0; }
 .planos-header-icon {
   width: 48px; height: 48px; border-radius: 14px; flex-shrink: 0;
   background: rgba(168,16,46,0.07); color: var(--accent);
   display: flex; align-items: center; justify-content: center;
 }
-.planos-stat-green { color: var(--green) !important; }
-.planos-stat-amber { color: var(--amber) !important; }
 
 /* ── Drop Zone ── */
 .planos-dropzone {
-  border: 2px dashed var(--border);
-  border-radius: var(--r);
-  background: var(--card);
-  padding: 36px 28px;
-  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  border: 2px dashed var(--border); border-radius: var(--r);
+  background: var(--card); padding: 28px 24px;
+  display: flex; flex-direction: column; align-items: center; gap: 7px;
   cursor: pointer; user-select: none; outline: none;
   transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
 }
-.planos-dropzone:hover {
-  border-color: var(--accent);
-  background: rgba(168,16,46,0.015);
-}
-.planos-dropzone:focus-visible {
-  box-shadow: 0 0 0 3px rgba(168,16,46,0.15);
-  border-color: var(--accent);
-}
+.planos-dropzone:hover { border-color: var(--accent); background: rgba(168,16,46,0.015); }
+.planos-dropzone:focus-visible { box-shadow: 0 0 0 3px rgba(168,16,46,0.15); border-color: var(--accent); }
 .planos-dropzone-active {
-  border-color: var(--accent) !important;
-  background: rgba(168,16,46,0.03) !important;
+  border-color: var(--accent) !important; background: rgba(168,16,46,0.03) !important;
   box-shadow: 0 0 0 4px rgba(168,16,46,0.08), var(--sh);
 }
-.planos-dz-icon {
-  color: var(--text3); margin-bottom: 4px;
-  transition: color 0.18s, transform 0.22s;
-}
+.planos-dz-icon { color: var(--text3); margin-bottom: 2px; transition: color 0.18s, transform 0.22s; }
 .planos-dz-icon-active,
-.planos-dropzone:hover .planos-dz-icon {
-  color: var(--accent);
-  transform: translateY(-4px);
-}
-.planos-dz-text {
-  font-size: 13px; font-weight: 700; color: var(--text); text-align: center;
-}
-.planos-dz-sub {
-  font-size: 11px; font-weight: 500; color: var(--text3);
-}
-.planos-dz-pill {
-  margin-top: 6px;
-  font-size: 11px; font-weight: 700;
-  padding: 6px 18px;
-  background: var(--abg); color: var(--accent);
-  border-radius: 20px; pointer-events: none;
+.planos-dropzone:hover .planos-dz-icon { color: var(--accent); transform: translateY(-3px); }
+.planos-dz-text  { font-size: 13px; font-weight: 700; color: var(--text); text-align: center; }
+.planos-dz-sub   { font-size: 11px; font-weight: 500; color: var(--text3); }
+.planos-dz-pill  {
+  margin-top: 4px; font-size: 11px; font-weight: 700; padding: 5px 16px;
+  background: var(--abg); color: var(--accent); border-radius: 20px; pointer-events: none;
 }
 
-/* ── Grid header ── */
-.planos-grid-hdr {
-  display: flex; align-items: center; justify-content: space-between;
-}
-.planos-grid-title {
-  font-size: 13px; font-weight: 800; color: var(--text);
-}
+/* ── Section header ── */
+.planos-grid-hdr { display: flex; align-items: center; justify-content: space-between; }
+.planos-grid-title { font-size: 13px; font-weight: 800; color: var(--text); }
 .planos-count-badge {
   font-size: 10px; font-weight: 700; color: var(--text3);
-  background: var(--bg); padding: 3px 10px;
-  border-radius: 20px; border: 1.5px solid var(--border);
+  background: var(--bg); padding: 3px 10px; border-radius: 20px; border: 1.5px solid var(--border);
 }
 
-/* ── Cards grid ── */
-.planos-grid {
+/* ── Badge (shared) ── */
+.planos-badge { font-size: 9px; font-weight: 800; padding: 3px 8px; border-radius: 20px; letter-spacing: 0.2px; white-space: nowrap; }
+
+/* ═══ Tree Table ═══ */
+
+.planos-tree-card {
+  background: var(--card); border: 1.5px solid var(--border2);
+  border-radius: var(--r); box-shadow: var(--sh); overflow: hidden;
+}
+
+/* Shared column grid — name | estado | versión | actualizado | acciones */
+.planos-tree-head,
+.planos-folder-row,
+.planos-file-row {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 12px;
+  grid-template-columns: 1fr 100px 64px 118px 210px;
+  align-items: center;
 }
 
-/* ── Card ── */
-.planos-card {
-  background: var(--card);
-  border: 1.5px solid var(--border2);
-  border-radius: var(--r);
-  box-shadow: var(--sh);
-  display: flex; flex-direction: column; overflow: hidden;
-  transition: box-shadow 0.18s, border-color 0.18s, transform 0.15s;
+/* Column header */
+.planos-tree-head {
+  background: var(--bg);
+  border-bottom: 1.5px solid var(--border2);
+  padding: 0 14px;
 }
-.planos-card:hover {
-  box-shadow: var(--shl);
-  border-color: var(--border);
-  transform: translateY(-2px);
+.planos-tree-head > div {
+  padding: 8px 6px;
+  font-size: 10px; font-weight: 800; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.6px;
 }
 
-/* Card top */
-.planos-card-top {
-  display: flex; align-items: flex-start; gap: 14px;
-  padding: 16px 16px 12px;
+/* ── Folder row ── */
+.planos-group { border-bottom: 1.5px solid var(--border2); }
+.planos-group-last { border-bottom: none; }
+
+.planos-folder-row {
+  width: 100%; border: none; background: var(--bg);
+  border-left: 3px solid transparent;
+  padding: 0 14px; cursor: pointer; text-align: left;
+  transition: background 0.13s, border-left-color 0.13s;
+}
+.planos-folder-row:hover { background: var(--border2); }
+
+.planos-folder-name-cell {
+  display: flex; align-items: center; gap: 7px;
+  padding: 9px 6px;
+}
+.planos-chevron { display: flex; align-items: center; color: var(--text3); flex-shrink: 0; }
+.planos-folder-ic { display: flex; align-items: center; flex-shrink: 0; opacity: 0.85; }
+.planos-folder-label { font-size: 12px; font-weight: 800; color: var(--text); }
+.planos-folder-count {
+  font-size: 10px; font-weight: 700; color: var(--text3);
+  padding: 0 6px; text-align: right;
 }
 
-/* Thumbnail */
-.planos-card-thumb {
-  width: 52px; height: 52px; border-radius: 13px;
-  display: flex; flex-direction: column; align-items: center;
-  justify-content: center; flex-shrink: 0; gap: 3px;
+/* ── File row ── */
+.planos-file-row {
+  border-bottom: 1px solid var(--border2); background: var(--card);
+  padding: 0 14px;
+  transition: background 0.1s;
 }
-.planos-thumb-pdf { background: rgba(168,16,46,0.07); color: var(--accent); }
-.planos-thumb-img { background: rgba(29,78,216,0.07); color: var(--blue);   }
-.planos-thumb-ext {
-  font-size: 8px; font-weight: 800;
-  font-family: 'JetBrains Mono', monospace;
-  letter-spacing: 0.5px; line-height: 1;
-}
+.planos-file-row-last { border-bottom: none; }
+.planos-file-row:hover { background: rgba(168,16,46,0.02); }
 
-/* Card info */
-.planos-card-info {
-  flex: 1; min-width: 0;
-  display: flex; flex-direction: column; gap: 6px;
-}
-.planos-card-name {
-  font-size: 12px; font-weight: 700; color: var(--text); line-height: 1.35;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.planos-card-badges { display: flex; gap: 5px; flex-wrap: wrap; }
-.planos-badge {
-  font-size: 9px; font-weight: 800;
-  padding: 3px 8px; border-radius: 20px; letter-spacing: 0.2px;
-}
-.planos-card-meta {
-  display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
-}
-.planos-ver {
-  display: inline-flex; align-items: center; gap: 3px;
-  font-size: 10px; font-weight: 700;
-  font-family: 'JetBrains Mono', monospace; color: var(--text2);
-}
-.planos-dot { color: var(--text3); font-size: 10px; }
-.planos-meta-dim { font-size: 10px; font-weight: 500; color: var(--text3); }
-
-/* Divider */
-.planos-card-divider { height: 1px; background: var(--border2); margin: 0 12px; }
-
-/* Card actions */
-.planos-card-actions {
+/* Name cell with tree indent */
+.planos-file-name-cell {
   display: flex; align-items: center; gap: 8px;
-  padding: 10px 12px 12px;
+  padding: 8px 6px; min-width: 0;
+}
+.planos-tree-line {
+  width: 20px; flex-shrink: 0; position: relative; align-self: stretch;
+  border-left: 1.5px solid; margin-left: 5px;
+}
+.planos-tree-arm {
+  position: absolute; top: 50%; left: 0;
+  width: 10px; height: 1.5px; background: currentColor;
+  border-top: 1.5px solid;
+}
+.planos-file-ic {
+  width: 24px; height: 24px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.planos-fic-pdf { background: rgba(168,16,46,0.08); color: var(--accent); }
+.planos-fic-img { background: rgba(29,78,216,0.08); color: var(--blue); }
+.planos-file-label {
+  font-size: 11px; font-weight: 600; color: var(--text);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;
 }
 
-/* IA Button — primary CTA */
-.planos-btn-ia {
-  flex: 1;
-  display: flex; align-items: center; justify-content: center; gap: 7px;
-  padding: 10px 14px;
-  background: var(--accent); color: #fff;
-  border: none; border-radius: var(--rs);
-  font-size: 11px; font-weight: 800; cursor: pointer;
-  letter-spacing: 0.1px; white-space: nowrap;
-  transition: background 0.14s, box-shadow 0.14s, transform 0.1s;
-  font-family: 'Inter', sans-serif;
+/* Data cells */
+.pt-col-estado { padding: 0 6px; }
+.planos-ver-cell {
+  font-size: 10px; font-weight: 700; color: var(--text2);
+  font-family: 'JetBrains Mono', monospace;
+  padding: 0 6px;
 }
-.planos-btn-ia:hover {
+.planos-date-cell {
+  font-size: 10px; font-weight: 500; color: var(--text3);
+  padding: 0 6px;
+}
+
+/* Actions cell */
+.planos-actions-cell {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 6px;
+}
+
+/* ── IA Button (compact row version) ── */
+.planos-btn-ia-sm {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px;
+  padding: 7px 10px;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: 9px;
+  font-size: 10px; font-weight: 800; cursor: pointer;
+  white-space: nowrap; letter-spacing: 0.05px;
+  font-family: 'Inter', sans-serif;
+  transition: background 0.13s, box-shadow 0.13s, transform 0.1s;
+}
+.planos-btn-ia-sm:hover {
   background: var(--accent2);
-  box-shadow: 0 4px 16px rgba(168,16,46,0.28);
+  box-shadow: 0 3px 12px rgba(168,16,46,0.25);
   transform: translateY(-1px);
 }
-.planos-btn-ia:active { transform: translateY(0); box-shadow: none; }
-.planos-ia-spark { font-size: 13px; line-height: 1; }
+.planos-btn-ia-sm:active { transform: translateY(0); box-shadow: none; }
 
-/* Kebab */
+/* ── Kebab ── */
 .planos-kebab-wrap { position: relative; flex-shrink: 0; }
 .planos-kebab-btn {
-  width: 34px; height: 34px; border-radius: 10px;
-  background: var(--bg); border: 1.5px solid var(--border2);
-  color: var(--text2);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  transition: background 0.12s, border-color 0.12s, color 0.12s;
+  width: 30px; height: 30px; border-radius: 8px;
+  background: transparent; border: 1.5px solid var(--border2);
+  color: var(--text3); display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background 0.12s, border-color 0.12s, color 0.12s;
 }
-.planos-kebab-btn:hover {
-  background: var(--white); border-color: var(--border); color: var(--text);
-}
+.planos-kebab-btn:hover { background: var(--bg); border-color: var(--border); color: var(--text); }
 .planos-kebab-menu {
-  position: absolute; right: 0; bottom: calc(100% + 6px);
-  min-width: 172px;
-  background: var(--card); border: 1.5px solid var(--border2);
-  border-radius: 14px; box-shadow: var(--shl);
-  z-index: 60; overflow: hidden; padding: 4px;
+  position: absolute; right: 0; bottom: calc(100% + 5px);
+  min-width: 172px; background: var(--card); border: 1.5px solid var(--border2);
+  border-radius: 14px; box-shadow: var(--shl); z-index: 60; padding: 4px;
 }
 .planos-kebab-item {
   display: flex; align-items: center; gap: 9px;
-  width: 100%; padding: 9px 12px;
-  background: none; border: none; border-radius: 10px;
-  font-size: 12px; font-weight: 600; color: var(--text);
-  cursor: pointer; text-align: left;
-  font-family: 'Inter', sans-serif;
-  transition: background 0.12s, color 0.12s;
+  width: 100%; padding: 9px 12px; background: none; border: none; border-radius: 10px;
+  font-size: 12px; font-weight: 600; color: var(--text); cursor: pointer; text-align: left;
+  font-family: 'Inter', sans-serif; transition: background 0.12s, color 0.12s;
 }
-.planos-kebab-item:hover { background: var(--bg); }
-.planos-kebab-danger     { color: var(--red); }
+.planos-kebab-item:hover  { background: var(--bg); }
+.planos-kebab-danger      { color: var(--red); }
 .planos-kebab-danger:hover { background: rgba(185,28,28,0.06); }
 .planos-kebab-sep { height: 1px; background: var(--border2); margin: 2px 8px; }
 
-/* Empty state */
+/* ── Empty state ── */
 .planos-empty {
   display: flex; flex-direction: column; align-items: center;
   justify-content: center; padding: 56px 20px; gap: 8px;
@@ -1636,13 +1626,11 @@ body {
 .planos-empty-text { font-size: 14px; font-weight: 800; color: var(--text); }
 .planos-empty-sub  { font-size: 12px; font-weight: 500; color: var(--text3); }
 
-/* Toast */
+/* ── Toast ── */
 .planos-toast {
   position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-  display: flex; align-items: center; gap: 8px;
-  padding: 11px 20px; border-radius: 40px;
-  font-size: 12px; font-weight: 700;
-  box-shadow: var(--shl); z-index: 500; white-space: nowrap;
+  display: flex; align-items: center; gap: 8px; padding: 11px 20px; border-radius: 40px;
+  font-size: 12px; font-weight: 700; box-shadow: var(--shl); z-index: 500; white-space: nowrap;
 }
 .planos-toast-success { background: var(--green); color: #fff; }
 .planos-toast-warn    { background: var(--amber); color: #fff; }
@@ -1673,6 +1661,8 @@ body {
   .pd-sidebar { width: 100%; position: static; }
   .pd-kpi-row { grid-template-columns: 1fr; }
   .pd-panel-row { grid-template-columns: 1fr; }
-  .planos-grid { grid-template-columns: 1fr; }
-  .planos-card-name { white-space: normal; }
+  .planos-tree-card { overflow-x: auto; }
+  .planos-tree-head,
+  .planos-folder-row,
+  .planos-file-row   { min-width: 560px; }
 }
